@@ -1,0 +1,10 @@
+{
+  "framework": "nextjs",
+  "regions": ["cdg1"],
+  "buildCommand": "npm run build",
+  "functions": {
+    "src/app/**/*": {
+      "runtime": "nodejs20.x"
+    }
+  }
+}
