@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // WordPress API proxy route - fixes CORS and mixed content issues
 export async function GET(request: NextRequest) {
   try {
-    const wordpressApiUrl = 'https://admin.digitalwebsuccess.com/wp-json/wp/v2/posts?status=publish&_embed';
+    const wordpressApiUrl = 'http://admin.digitalwebsuccess.com/wp-json/wp/v2/posts?status=publish&_embed';
 
     console.log('🔄 Proxying WordPress API request:', wordpressApiUrl);
 
@@ -12,9 +12,6 @@ export async function GET(request: NextRequest) {
       headers: {
         'Content-Type': 'application/json',
       },
-      // Allow self-signed SSL certificates
-      // @ts-ignore
-      rejectUnauthorized: false,
     });
 
     if (!response.ok) {
