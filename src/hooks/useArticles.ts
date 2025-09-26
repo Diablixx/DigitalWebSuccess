@@ -57,11 +57,10 @@ export function useArticles() {
       setLoading(true);
       setError(null);
 
-      console.log('📰 Loading published articles from WordPress API...');
+      console.log('📰 Loading published articles from WordPress via Next.js API proxy...');
 
-      const apiUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'http://admin.digitalwebsuccess.com/wp-json/wp/v2';
-
-      const response = await fetch(`${apiUrl}/posts?status=publish&_embed`);
+      // Use Next.js API route to proxy WordPress calls (fixes CORS + mixed content)
+      const response = await fetch('/api/articles');
 
       if (!response.ok) {
         throw new Error(`WordPress API error: ${response.status}`);
