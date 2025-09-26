@@ -41,7 +41,10 @@
       "Bash(git push:*)",
       "Bash(git reset:*)",
       "Bash(npx vercel build:*)",
-      "WebFetch(domain:optimus-version-one-7hvb.vercel.app)"
+      "WebFetch(domain:optimus-version-one-7hvb.vercel.app)",
+      "Bash(nslookup:*)",
+      "WebFetch(domain:www.digitalwebsuccess.com)",
+      "WebFetch(domain:admin.digitalwebsuccess.com)"
     ],
     "deny": [],
     "ask": []

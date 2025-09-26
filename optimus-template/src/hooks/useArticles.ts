@@ -1,7 +1,51 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase, type Article } from '@/lib/supabase';
+
+// WordPress API Response Type
+interface WordPressPost {
+  id: number;
+  slug: string;
+  title: { rendered: string };
+  content: { rendered: string };
+  excerpt: { rendered: string };
+  date: string;
+  modified: string;
+  status: string;
+  author: number;
+  featured_media: number;
+}
+
+// Convert WordPress post to Article format
+export interface Article {
+  id: string;
+  title: string;
+  content: string;
+  slug: string;
+  excerpt: string;
+  read_time: string;
+  published: boolean;
+  created_at: string;
+  meta_description: string;
+  author: string;
+  category: string;
+}
+
+function convertWordPressToArticle(post: WordPressPost): Article {
+  return {
+    id: post.id.toString(),
+    title: post.title.rendered,
+    content: post.content.rendered,
+    slug: post.slug,
+    excerpt: post.excerpt.rendered.replace(/<[^>]*>/g, ''), // Strip HTML
+    read_time: '5 min', // Default read time
+    published: post.status === 'publish',
+    created_at: post.date,
+    meta_description: post.excerpt.rendered.replace(/<[^>]*>/g, '').substring(0, 160),
+    author: 'Admin',
+    category: 'Article'
+  };
+}
 
 export function useArticles() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -13,23 +57,23 @@ export function useArticles() {
       setLoading(true);
       setError(null);
 
-      console.log('📰 Loading published articles from Supabase...');
+      console.log('📰 Loading published articles from WordPress...');
 
-      const { data, error: supabaseError } = await supabase
-        .from('articles')
-        .select('*')
-        .eq('published', true)
-        .order('created_at', { ascending: false });
+      const apiUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://admin.digitalwebsuccess.com/wp-json/wp/v2';
 
-      if (supabaseError) {
-        console.error('❌ Supabase error:', supabaseError);
-        throw new Error(`Erreur Supabase: ${supabaseError.message}`);
+      const response = await fetch(`${apiUrl}/posts?status=publish&_embed`);
+
+      if (!response.ok) {
+        throw new Error(`WordPress API error: ${response.status}`);
       }
 
-      console.log('✅ Articles loaded:', data?.length || 0);
-      setArticles(data || []);
+      const wordpressPosts: WordPressPost[] = await response.json();
+      const convertedArticles = wordpressPosts.map(convertWordPressToArticle);
+
+      console.log('✅ Articles loaded from WordPress:', convertedArticles.length);
+      setArticles(convertedArticles);
     } catch (err) {
-      console.error('❌ Error loading articles:', err);
+      console.error('❌ Error loading articles from WordPress:', err);
       setError(err instanceof Error ? err.message : 'Erreur inattendue');
       setArticles([]);
     } finally {
@@ -38,52 +82,12 @@ export function useArticles() {
   };
 
   useEffect(() => {
-    // Initial load
     loadArticles();
 
-    // Set up real-time subscription for article changes
-    console.log('🔄 Setting up real-time subscription for articles...');
+    // Poll for updates every 30 seconds (since WordPress doesn't have real-time subscriptions)
+    const interval = setInterval(loadArticles, 30000);
 
-    const subscription = supabase
-      .channel('articles_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // Listen to all changes (INSERT, UPDATE, DELETE)
-          schema: 'public',
-          table: 'articles',
-          filter: 'published=eq.true' // Only listen to published articles
-        },
-        (payload) => {
-          console.log('🔔 Real-time article update:', payload);
-
-          if (payload.eventType === 'INSERT' && payload.new) {
-            // New article published
-            setArticles(prev => [payload.new as Article, ...prev]);
-          } else if (payload.eventType === 'UPDATE' && payload.new) {
-            // Article updated
-            setArticles(prev =>
-              prev.map(article =>
-                article.id === payload.new.id ? payload.new as Article : article
-              )
-            );
-          } else if (payload.eventType === 'DELETE' && payload.old) {
-            // Article unpublished or deleted
-            setArticles(prev =>
-              prev.filter(article => article.id !== payload.old.id)
-            );
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('📡 Subscription status:', status);
-      });
-
-    // Cleanup subscription on unmount
-    return () => {
-      console.log('🧹 Cleaning up articles subscription...');
-      subscription.unsubscribe();
-    };
+    return () => clearInterval(interval);
   }, []);
 
   return {
