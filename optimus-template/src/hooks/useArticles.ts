@@ -57,9 +57,9 @@ export function useArticles() {
       setLoading(true);
       setError(null);
 
-      console.log('📰 Loading published articles from WordPress...');
+      console.log('📰 Loading published articles from WordPress API...');
 
-      const apiUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://admin.digitalwebsuccess.com/wp-json/wp/v2';
+      const apiUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'http://admin.digitalwebsuccess.com/wp-json/wp/v2';
 
       const response = await fetch(`${apiUrl}/posts?status=publish&_embed`);
 
