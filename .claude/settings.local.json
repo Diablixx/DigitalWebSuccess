@@ -44,7 +44,9 @@
       "WebFetch(domain:optimus-version-one-7hvb.vercel.app)",
       "Bash(nslookup:*)",
       "WebFetch(domain:www.digitalwebsuccess.com)",
-      "WebFetch(domain:admin.digitalwebsuccess.com)"
+      "WebFetch(domain:admin.digitalwebsuccess.com)",
+      "Bash(git init:*)",
+      "Bash(git branch:*)"
     ],
     "deny": [],
     "ask": []
