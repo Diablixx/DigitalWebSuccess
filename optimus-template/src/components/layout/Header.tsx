@@ -1,24 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import BlogMegaMenu from './BlogMegaMenu';
+import { useNavigation } from '@/hooks/useNavigation';
+import MegaMenu from './MegaMenu';
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const navigation = [
-    { name: 'Accueil', href: '/' },
-    { name: 'Services', href: '/services' },
-    { name: 'Formations', href: '/formations' },
-    { name: 'Ressources', href: '/ressources' },
-    { name: 'Contact', href: '/contact' },
-  ];
+  const { navigation, loading } = useNavigation();
 
   return (
     <header className="bg-white shadow-sm">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Top">
         <div className="flex w-full items-center justify-between border-b border-indigo-500 py-6 lg:border-none">
+          {/* Logo */}
           <div className="flex items-center">
             <Link href="/">
               <span className="sr-only">Optimus</span>
@@ -32,18 +25,42 @@ export default function Header() {
               </Link>
             </div>
           </div>
-          <div className="ml-10 space-x-4 hidden lg:block">
-            {navigation.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="text-base font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200"
-              >
-                {link.name}
-              </Link>
-            ))}
-            <BlogMegaMenu />
+
+          {/* Desktop Navigation */}
+          <div className="ml-10 space-x-4 hidden lg:flex items-center">
+            {loading ? (
+              // Loading skeleton
+              <div className="flex space-x-4">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="h-6 w-20 bg-gray-200 rounded animate-pulse"></div>
+                ))}
+              </div>
+            ) : (
+              // Dynamic navigation from WordPress
+              navigation.map((item) =>
+                item.hasChildren ? (
+                  // Menu with mega menu (Actualités, Tutos, Contenu)
+                  <MegaMenu
+                    key={item.id}
+                    title={item.title}
+                    href={item.href}
+                    children={item.children}
+                  />
+                ) : (
+                  // Simple link (Accueil)
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    className="text-base font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200"
+                  >
+                    {item.title}
+                  </Link>
+                )
+              )
+            )}
           </div>
+
+          {/* Right side actions */}
           <div className="ml-4 flex items-center space-x-4">
             <Link
               href="/login"
@@ -59,19 +76,41 @@ export default function Header() {
             </Link>
           </div>
         </div>
-        <div className="flex flex-wrap justify-center space-x-6 py-4 lg:hidden">
-          {navigation.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              className="text-base font-medium text-gray-500 hover:text-gray-900"
-            >
-              {link.name}
-            </Link>
-          ))}
-          <div className="w-full flex justify-center mt-2">
-            <BlogMegaMenu />
-          </div>
+
+        {/* Mobile Navigation */}
+        <div className="flex flex-wrap justify-center gap-4 py-4 lg:hidden">
+          {loading ? (
+            <div className="flex space-x-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-6 w-20 bg-gray-200 rounded animate-pulse"></div>
+              ))}
+            </div>
+          ) : (
+            navigation.map((item) => (
+              <div key={item.id} className="flex flex-col items-center">
+                <Link
+                  href={item.href}
+                  className="text-base font-medium text-gray-500 hover:text-gray-900"
+                >
+                  {item.title}
+                </Link>
+                {/* Mobile: Show children as dropdown or simple list */}
+                {item.hasChildren && (
+                  <div className="mt-2 flex flex-col items-center space-y-1">
+                    {item.children.map((child) => (
+                      <Link
+                        key={child.id}
+                        href={child.href}
+                        className="text-sm text-gray-400 hover:text-gray-600"
+                      >
+                        {child.title}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </nav>
     </header>
