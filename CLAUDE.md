@@ -32,9 +32,11 @@ The OPTIMUS project is a comprehensive AI-powered content management system cons
 - **✅ WordPress Headless Setup**: admin.digitalwebsuccess.com fully configured and working
 - **✅ Next.js Deployment**: www.digitalwebsuccess.com live on Vercel with custom domain
 - **✅ WordPress API Integration**: BlogMegaMenu fetches from admin.digitalwebsuccess.com/wp-json/wp/v2
+- **✅ WordPress-Driven Navigation**: Dynamic navigation with parent/child pages and mega menus
 - **✅ Environment Variables**: All production variables configured in Vercel
 - **✅ DNS Configuration**: Custom domains properly routed
 - **✅ Real-time Article Display**: WordPress posts appear in BlogMegaMenu within 30 seconds
+- **✅ Stages Récupération Points**: Full search and booking system for driving license points recovery courses
 
 ### ⚠️ PENDING CONFIGURATION:
 - **🔧 N8N Webhook**: Update to POST articles to admin.digitalwebsuccess.com (currently posts to old WordPress.com)
@@ -64,6 +66,190 @@ The OPTIMUS project is a comprehensive AI-powered content management system cons
 - **French apostrophes**: Use proper escaping (`l\'article` in JS strings, `l'article` in display)
 - **NO HTML entities**: Convert `&apos;` to proper apostrophes
 - **Example**: "Générer l'article" NOT "Générer l&apos;article"
+
+## 🚗 Stages Récupération de Points Feature (January 2025)
+
+### Feature Overview
+Complete search and booking system for driving license points recovery courses (stages de récupération de points). Users can search by city, filter results, and select courses directly from the website.
+
+### Architecture
+- **Data Source**: Supabase table `stages_recuperation_points` (NOT WordPress)
+- **Content Management**: All course data managed exclusively in Supabase
+- **WordPress Role**: Only for text content in articles/pages (not for stages data)
+
+### User Flow
+1. **Homepage Search**: Search bar above WordPress content on Accueil page
+2. **City Autocomplete**: Dynamic suggestions from Supabase cities
+3. **Results Page**: `/stages-recuperation-points/[city]` with 3-column layout
+4. **Filter & Sort**: By city, date, and price
+5. **Course Selection**: Click "Sélectionner" to view details
+6. **Detail Page**: `/stages-recuperation-points/[city]/[id]` with full information
+7. **Validation**: "Valider" button (personal info form - future implementation)
+
+### Database Schema (Supabase)
+
+```sql
+stages_recuperation_points {
+  id: UUID (primary key)
+  city: TEXT (e.g., "MONTPELLIER")
+  postal_code: TEXT (e.g., "34000")
+  full_address: TEXT (e.g., "211 rue marius carrieu")
+  location_name: TEXT (e.g., "Centre de Formation Auto-École Plus")
+  date_start: DATE (course start date)
+  date_end: DATE (course end date, usually next day)
+  price: NUMERIC (course price in euros)
+  created_at: TIMESTAMP
+  updated_at: TIMESTAMP
+}
+```
+
+**Key Points:**
+- City names stored in UPPERCASE for consistency
+- Courses span 2 days (Friday-Saturday typically)
+- Prices range from €215-€259 based on location
+- All French cities supported
+
+### Pages & Routes
+
+#### 1. Homepage (`/`)
+- **WordPress Content**: Fetched from "Accueil" page
+- **Search Bar**: Positioned ABOVE WordPress content
+- **Autocomplete**: Dynamically fetches unique cities from Supabase
+- **Search Action**: Redirects to `/stages-recuperation-points/[city]`
+
+#### 2. Results Page (`/stages-recuperation-points/[city]`)
+**Layout: 3-column responsive design**
+
+**Left Sidebar (~230px):**
+- City search box with autocomplete
+- "Trier par" panel with radio options: Date, Prix
+- "Filtrer par" panel with city checkboxes
+
+**Center Column (~640px):**
+- Page title: "Stage de Récupération de Points [CITY]"
+- Subtitle with description
+- Sort toolbar (inline radios)
+- Results list (StageCard components)
+
+**Right Sidebar (~260px):**
+- "NOS ENGAGEMENTS" section
+- Benefits list with icons:
+  - +4 Points en 48h
+  - Stages Agréés
+  - Prix le Plus Bas Garanti
+  - 14 Jours pour Changer d'Avis
+
+#### 3. Detail Page (`/stages-recuperation-points/[city]/[id]`)
+- Full course details
+- Location information
+- Date and time
+- Price breakdown
+- "Valider" button at bottom
+
+### Components Structure
+
+```
+src/components/stages/
+├── CitySearchBar.tsx         # Search with autocomplete
+├── StageCard.tsx             # Individual result card
+├── FiltersSidebar.tsx        # Left sidebar filters
+├── EngagementsSidebar.tsx    # Right sidebar commitments
+└── StagesSortToolbar.tsx     # Inline sort controls
+```
+
+### Design Specifications
+
+**Colors:**
+- Page background: `#ffffff`
+- Main text: `#222222` / `#333333`
+- Metadata text: `#666666`
+- Link blue: `#0b6aa8`
+- Accent red: `#d9534f` (left card block)
+- CTA green: `#5cb85c` → `#4aa43a` (gradient)
+- Checkbox blue: `#1976d2`
+
+**Typography:**
+- Font family: "Open Sans", "Helvetica Neue", Arial, sans-serif
+- Base size: 14px
+- City title: 18px, weight 600, uppercase
+- Price: 22px, weight 700
+
+**Card Structure:**
+- Height: ~84px
+- Red vertical block (left): 56×56px, rounded 6px
+- City name: Uppercase blue link
+- Address: Grey text below city
+- Date: Right-aligned
+- Price: Large bold right-aligned
+- Green "Sélectionner" button: 110×36px
+
+**Responsive:**
+- Desktop: 3-column layout
+- Tablet (<992px): Filters collapse to drawer
+- Mobile: Single column, full-width cards
+
+### Key Features
+
+**Search & Autocomplete:**
+- Real-time city suggestions as user types
+- Matches partial input (e.g., "M" shows "MARSEILLE", "MONTPELLIER")
+- Fetches unique cities from Supabase dynamically
+
+**Filtering:**
+- By city (multi-select checkboxes)
+- By date (ascending/descending)
+- By price (low to high / high to low)
+
+**Sorting:**
+- Date (chronological)
+- Price (ascending/descending)
+- Default: Date ascending
+
+**Data Management:**
+- All course data stored in Supabase
+- WordPress NOT used for course content
+- Content updates: Direct Supabase modifications
+- No WordPress admin panel for stages
+
+### Implementation Files
+
+**Hooks:**
+- `src/hooks/useStages.ts` - Fetch stages with filters
+- `src/hooks/useCities.ts` - Fetch unique cities for autocomplete
+
+**Pages:**
+- `src/app/page.tsx` - Homepage with search bar
+- `src/app/stages-recuperation-points/[city]/page.tsx` - Results page
+- `src/app/stages-recuperation-points/[city]/[id]/page.tsx` - Detail page
+
+**API Routes (if needed):**
+- `/api/stages` - Fetch stages with query params
+- `/api/cities` - Get unique cities list
+
+### Sample Data
+24 courses across 10 French cities:
+- Montpellier, Marseille, Avignon, Lyon, Nice
+- Toulouse, Nantes, Bordeaux, Strasbourg, Lille
+
+Dates: October-November 2025
+Prices: €215-€259
+
+### SEO Considerations
+- URL structure: `/stages-recuperation-points/[city]` (SEO-friendly)
+- Dynamic metadata per city
+- City names in uppercase for consistency
+- Structured data for local business markup (future)
+
+### Future Enhancements (Not Implemented Yet)
+- Personal information form after validation
+- Payment integration
+- Email confirmation
+- Booking management dashboard
+- Proximity sorting (requires lat/lng coordinates)
+- Calendar view
+- Mobile app
+
+---
 
 ## Technical Configuration
 

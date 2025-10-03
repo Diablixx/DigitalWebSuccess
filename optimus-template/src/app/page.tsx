@@ -1,4 +1,5 @@
 import Layout from '@/components/layout/Layout';
+import CitySearchBar from '@/components/stages/CitySearchBar';
 
 interface WordPressPage {
   id: number;
@@ -83,12 +84,29 @@ export default async function Home() {
     );
   }
 
-  // Display WordPress content
+  // Display WordPress content with search bar above
   return (
     <Layout>
       <article className="bg-white">
+        {/* Hero Section with City Search */}
+        <div className="bg-gradient-to-b from-blue-50 to-white py-12">
+          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-3">
+                Trouvez votre Stage de Récupération de Points
+              </h1>
+              <p className="text-lg text-gray-600">
+                Récupérez 4 points en 48h - Stages agréés par la Préfecture
+              </p>
+            </div>
+            <div className="max-w-2xl mx-auto">
+              <CitySearchBar placeholder="Entrez votre ville" variant="large" />
+            </div>
+          </div>
+        </div>
+
+        {/* WordPress Page Content */}
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          {/* WordPress Page Content */}
           <div
             className="prose prose-lg prose-indigo max-w-none"
             dangerouslySetInnerHTML={{ __html: page.content.rendered }}
