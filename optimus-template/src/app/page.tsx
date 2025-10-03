@@ -14,10 +14,10 @@ interface WordPressPage {
 
 async function getHomePage(): Promise<WordPressPage | null> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://admin.digitalwebsuccess.com/wp-json/wp/v2';
+    const apiUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'http://admin.digitalwebsuccess.com/wp-json/wp/v2';
 
-    // Fetch the "Accueil" page from WordPress
-    const response = await fetch(`${apiUrl}/pages?slug=accueil&status=publish`, {
+    // Fetch the "Acceuil" page from WordPress (note: EU spelling)
+    const response = await fetch(`${apiUrl}/pages?slug=acceuil&status=publish`, {
       next: { revalidate: 30 }, // Revalidate every 30 seconds
     });
 
@@ -58,37 +58,11 @@ export async function generateMetadata() {
 export default async function Home() {
   const page = await getHomePage();
 
-  // Fallback if WordPress page not found (show default content)
-  if (!page) {
-    return (
-      <Layout>
-        <div className="bg-white">
-          <div className="relative bg-gradient-to-r from-blue-600 to-indigo-700">
-            <div className="absolute inset-0 bg-black opacity-25"></div>
-            <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
-              <div className="text-center">
-                <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-                  Solutions d'Intelligence Artificielle
-                </h1>
-                <p className="mx-auto mt-6 max-w-2xl text-xl text-gray-200">
-                  Transformez votre entreprise avec nos solutions IA avancées.
-                </p>
-                <p className="mt-4 text-sm text-yellow-200">
-                  ⚠️ Page "Accueil" non trouvée dans WordPress
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  // Display WordPress content with search bar above
+  // Always show search bar, with or without WordPress content
   return (
     <Layout>
       <article className="bg-white">
-        {/* Hero Section with City Search */}
+        {/* Hero Section with City Search - ALWAYS VISIBLE */}
         <div className="bg-gradient-to-b from-blue-50 to-white py-12">
           <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-8">
@@ -105,13 +79,15 @@ export default async function Home() {
           </div>
         </div>
 
-        {/* WordPress Page Content */}
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <div
-            className="prose prose-lg prose-indigo max-w-none"
-            dangerouslySetInnerHTML={{ __html: page.content.rendered }}
-          />
-        </div>
+        {/* WordPress Page Content (if exists) */}
+        {page && (
+          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+            <div
+              className="prose prose-lg prose-indigo max-w-none"
+              dangerouslySetInnerHTML={{ __html: page.content.rendered }}
+            />
+          </div>
+        )}
       </article>
     </Layout>
   );
