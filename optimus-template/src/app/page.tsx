@@ -12,6 +12,11 @@ interface WordPressPage {
   status: string;
 }
 
+interface PageContent {
+  above: string;
+  below: string;
+}
+
 async function getHomePage(): Promise<WordPressPage | null> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'http://admin.digitalwebsuccess.com/wp-json/wp/v2';
@@ -39,56 +44,79 @@ async function getHomePage(): Promise<WordPressPage | null> {
   }
 }
 
+function splitContent(html: string): PageContent {
+  // Split content at <!-- SEARCH_BAR --> delimiter
+  const delimiter = '<!-- SEARCH_BAR -->';
+  const parts = html.split(delimiter);
+
+  return {
+    above: parts[0] || '',
+    below: parts[1] || '',
+  };
+}
+
 export async function generateMetadata() {
   const page = await getHomePage();
 
   if (!page) {
     return {
-      title: 'Optimus - Solutions d\'Intelligence Artificielle',
-      description: 'Transformez votre entreprise avec nos solutions IA avancées.',
+      title: 'ProStages - Stage de Récupération de Points',
+      description: 'Récupérez 4 points en 48h - Stages agréés par la Préfecture',
     };
   }
 
   return {
-    title: `${page.title.rendered} | Optimus`,
-    description: page.excerpt.rendered.replace(/<[^>]*>/g, '').substring(0, 160) || 'Solutions d\'Intelligence Artificielle',
+    title: `${page.title.rendered} | ProStages`,
+    description: page.excerpt.rendered.replace(/<[^>]*>/g, '').substring(0, 160) || 'Stage de Récupération de Points',
   };
 }
 
 export default async function Home() {
   const page = await getHomePage();
+  const content = page ? splitContent(page.content.rendered) : { above: '', below: '' };
 
-  // Always show search bar, with or without WordPress content
   return (
     <Layout>
-      <article className="bg-white">
-        {/* Hero Section with City Search - ALWAYS VISIBLE */}
-        <div className="bg-gradient-to-b from-blue-50 to-white py-12">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                Trouvez votre Stage de Récupération de Points
-              </h1>
-              <p className="text-lg text-gray-600">
-                Récupérez 4 points en 48h - Stages agréés par la Préfecture
-              </p>
-            </div>
-            <div className="max-w-2xl mx-auto">
-              <CitySearchBar placeholder="Entrez votre ville" variant="large" />
-            </div>
+      {/* Hero Section with Background */}
+      <div className="relative bg-gradient-to-b from-gray-800 to-gray-900 min-h-[560px] flex items-center justify-center">
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-black/40"></div>
+
+        {/* Hero Content */}
+        <div className="relative z-10 mx-auto max-w-[880px] px-4 sm:px-6 lg:px-8 text-center">
+          {/* WordPress Content Above Search Bar */}
+          {content.above && (
+            <div
+              className="prose prose-lg prose-invert max-w-none mb-6"
+              style={{
+                fontSize: '48px',
+                fontWeight: 700,
+                lineHeight: 1.1,
+                color: '#ffffff',
+                textShadow: '0 2px 8px rgba(0,0,0,0.45)',
+              }}
+              dangerouslySetInnerHTML={{ __html: content.above }}
+            />
+          )}
+
+          {/* Search Bar */}
+          <div className="max-w-[640px] mx-auto">
+            <CitySearchBar placeholder="Saisir une ville pour trouver un stage" variant="large" />
           </div>
         </div>
+      </div>
 
-        {/* WordPress Page Content (if exists) */}
-        {page && (
+      {/* WordPress Content Below Search Bar */}
+      {content.below && (
+        <div className="bg-white">
           <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
             <div
               className="prose prose-lg prose-indigo max-w-none"
-              dangerouslySetInnerHTML={{ __html: page.content.rendered }}
+              dangerouslySetInnerHTML={{ __html: content.below }}
             />
           </div>
-        )}
-      </article>
+        </div>
+      )}
     </Layout>
   );
 }

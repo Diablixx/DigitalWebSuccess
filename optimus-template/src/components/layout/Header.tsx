@@ -8,38 +8,53 @@ export default function Header() {
   const { navigation, loading } = useNavigation();
 
   return (
-    <header className="bg-white shadow-sm">
-      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Top">
-        <div className="flex w-full items-center justify-between border-b border-indigo-500 py-6 lg:border-none">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link href="/">
-              <span className="sr-only">Optimus</span>
-              <div className="h-10 w-10 bg-indigo-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">O</span>
-              </div>
-            </Link>
-            <div className="ml-4">
-              <Link href="/" className="text-2xl font-bold text-gray-900">
-                Optimus
-              </Link>
-            </div>
+    <header className="sticky top-0 z-50">
+      {/* Top Thin Bar */}
+      <div className="bg-white h-10 flex items-center px-4 border-b border-gray-200">
+        <div className="mx-auto max-w-[1200px] w-full flex items-center justify-between">
+          {/* Logo Left */}
+          <Link href="/" className="flex items-center gap-2">
+            <span className="text-xl font-bold text-gray-900">ProStages</span>
+            <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded">Permis</span>
+          </Link>
+
+          {/* Center Text */}
+          <div className="hidden md:block">
+            <p className="text-xs uppercase text-gray-500 tracking-wider">
+              Stage de Récupération de Points
+            </p>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="ml-10 space-x-4 hidden lg:flex items-center">
+          {/* Espace Client Right */}
+          <Link
+            href="/espace-client"
+            className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 hover:underline transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span>Espace Client</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* Main Nav Bar (Dark) */}
+      <nav className="bg-[#222222] h-14" aria-label="Navigation principale">
+        <div className="mx-auto max-w-[1200px] h-full flex items-center justify-between px-4">
+          {/* Left: WordPress Navigation */}
+          <div className="flex items-center gap-7">
             {loading ? (
               // Loading skeleton
-              <div className="flex space-x-4">
+              <div className="flex gap-7">
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} className="h-6 w-20 bg-gray-200 rounded animate-pulse"></div>
+                  <div key={i} className="h-4 w-24 bg-gray-700 rounded animate-pulse"></div>
                 ))}
               </div>
             ) : (
               // Dynamic navigation from WordPress
               navigation.map((item) =>
                 item.hasChildren ? (
-                  // Menu with mega menu (Actualités, Tutos, Contenu)
+                  // Menu with mega menu
                   <MegaMenu
                     key={item.id}
                     title={item.title}
@@ -47,11 +62,11 @@ export default function Header() {
                     children={item.children}
                   />
                 ) : (
-                  // Simple link (Accueil)
+                  // Simple link
                   <Link
                     key={item.id}
                     href={item.href}
-                    className="text-base font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200"
+                    className="text-white text-sm font-semibold uppercase tracking-wide hover:text-gray-300 transition-colors duration-200"
                   >
                     {item.title}
                   </Link>
@@ -60,57 +75,21 @@ export default function Header() {
             )}
           </div>
 
-          {/* Right side actions */}
-          <div className="ml-4 flex items-center space-x-4">
+          {/* Right: Secondary Links */}
+          <div className="flex items-center gap-6">
             <Link
-              href="/login"
-              className="text-base font-medium text-gray-500 hover:text-gray-900"
+              href="/qui-sommes-nous"
+              className="text-white text-sm font-semibold uppercase tracking-wide hover:text-gray-300 transition-colors duration-200"
             >
-              Connexion
+              Qui Sommes-Nous
             </Link>
             <Link
-              href="/offre-pdf"
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md text-base font-medium hover:bg-indigo-700 transition-colors duration-200"
+              href="/aide-contact"
+              className="bg-[#2b85c9] hover:bg-[#236fae] text-white px-4 py-2 rounded-sm text-sm font-semibold uppercase tracking-wide transition-colors duration-200"
             >
-              Offre PDF
+              Aide et Contact
             </Link>
           </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        <div className="flex flex-wrap justify-center gap-4 py-4 lg:hidden">
-          {loading ? (
-            <div className="flex space-x-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-6 w-20 bg-gray-200 rounded animate-pulse"></div>
-              ))}
-            </div>
-          ) : (
-            navigation.map((item) => (
-              <div key={item.id} className="flex flex-col items-center">
-                <Link
-                  href={item.href}
-                  className="text-base font-medium text-gray-500 hover:text-gray-900"
-                >
-                  {item.title}
-                </Link>
-                {/* Mobile: Show children as dropdown or simple list */}
-                {item.hasChildren && (
-                  <div className="mt-2 flex flex-col items-center space-y-1">
-                    {item.children.map((child) => (
-                      <Link
-                        key={child.id}
-                        href={child.href}
-                        className="text-sm text-gray-400 hover:text-gray-600"
-                      >
-                        {child.title}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))
-          )}
         </div>
       </nav>
     </header>
