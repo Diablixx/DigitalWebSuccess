@@ -45,9 +45,23 @@ async function getHomePage(): Promise<WordPressPage | null> {
 }
 
 function splitContent(html: string): PageContent {
-  // Split content at <!-- SEARCH_BAR --> delimiter
-  const delimiter = '<!-- SEARCH_BAR -->';
-  const parts = html.split(delimiter);
+  // Try multiple delimiters (WordPress-friendly text markers)
+  const delimiters = [
+    '[SEARCH_BAR]',
+    '***SEARCH_BAR***',
+    '<!-- SEARCH_BAR -->',
+    '&lt;!-- SEARCH_BAR --&gt;', // WordPress HTML entities
+  ];
+
+  let parts: string[] = [html];
+
+  // Find which delimiter exists in the content
+  for (const delimiter of delimiters) {
+    if (html.includes(delimiter)) {
+      parts = html.split(delimiter);
+      break;
+    }
+  }
 
   return {
     above: parts[0] || '',
