@@ -16,8 +16,8 @@ async function getHomePage(): Promise<WordPressPage | null> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'http://admin.digitalwebsuccess.com/wp-json/wp/v2';
 
-    // Fetch the "Acceuil" page from WordPress (note: EU spelling)
-    const response = await fetch(`${apiUrl}/pages?slug=acceuil&status=publish`, {
+    // Fetch the "Homepage" page from WordPress
+    const response = await fetch(`${apiUrl}/pages?slug=homepage&status=publish`, {
       next: { revalidate: 30 }, // Revalidate every 30 seconds
     });
 
