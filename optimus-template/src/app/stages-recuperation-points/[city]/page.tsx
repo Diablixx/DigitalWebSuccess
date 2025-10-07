@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Layout from '@/components/layout/Layout';
 import FiltersSidebar from '@/components/stages/FiltersSidebar';
@@ -8,19 +8,57 @@ import StageCard from '@/components/stages/StageCard';
 import EngagementsSidebar from '@/components/stages/EngagementsSidebar';
 import { useStages } from '@/hooks/useStages';
 
+interface WordPressPage {
+  id: number;
+  slug: string;
+  title: { rendered: string };
+  content: { rendered: string };
+}
+
 export default function StagesResultsPage() {
   const params = useParams();
   const city = (params.city as string)?.toUpperCase();
+  const citySlug = (params.city as string)?.toLowerCase();
 
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'date' | 'price'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [cityContent, setCityContent] = useState<string | null>(null);
+  const [loadingContent, setLoadingContent] = useState(true);
 
   const { stages, loading, error } = useStages(city, {
     cities: selectedCities,
     sortBy,
     sortOrder,
   });
+
+  // Fetch city-specific WordPress content
+  useEffect(() => {
+    async function fetchCityContent() {
+      try {
+        setLoadingContent(true);
+        const apiUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://admin.digitalwebsuccess.com/wp-json/wp/v2';
+
+        // Fetch WordPress page with slug pattern: stages-{city}
+        const response = await fetch(`${apiUrl}/pages?slug=stages-${citySlug}&status=publish`);
+
+        if (response.ok) {
+          const pages: WordPressPage[] = await response.json();
+          if (pages.length > 0) {
+            setCityContent(pages[0].content.rendered);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching city content:', err);
+      } finally {
+        setLoadingContent(false);
+      }
+    }
+
+    if (citySlug) {
+      fetchCityContent();
+    }
+  }, [citySlug]);
 
   const handleSortChange = (newSortBy: 'date' | 'price', newSortOrder: 'asc' | 'desc') => {
     setSortBy(newSortBy);
@@ -121,6 +159,18 @@ export default function StagesResultsPage() {
             <EngagementsSidebar />
           </div>
         </div>
+
+        {/* City-Specific WordPress Content */}
+        {cityContent && !loadingContent && (
+          <div className="bg-gray-50 border-t border-gray-200">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+              <div
+                className="prose prose-lg max-w-none"
+                dangerouslySetInnerHTML={{ __html: cityContent }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
