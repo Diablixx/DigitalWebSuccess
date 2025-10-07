@@ -32,31 +32,27 @@ export default function StagesResultsPage() {
     sortOrder,
   });
 
-  // Fetch city-specific WordPress content
+  // Fetch city-specific WordPress content via internal API
   useEffect(() => {
     async function fetchCityContent() {
       try {
         setLoadingContent(true);
-        const apiUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://admin.digitalwebsuccess.com/wp-json/wp/v2';
 
-        console.log(`🔍 Fetching WordPress content for city: ${citySlug}`);
-        console.log(`📡 API URL: ${apiUrl}/pages?slug=stages-${citySlug}`);
+        console.log(`🔍 Fetching content for city: ${citySlug}`);
 
-        // Fetch specific page by slug directly
-        const response = await fetch(`${apiUrl}/pages?slug=stages-${citySlug}&status=publish`);
+        // Fetch from internal API route (bypasses mixed content issues)
+        const response = await fetch(`/api/city-content/${citySlug}`);
 
         if (response.ok) {
-          const pages: WordPressPage[] = await response.json();
-          console.log(`✅ Found ${pages.length} pages for stages-${citySlug}`);
-
-          if (pages.length > 0) {
-            console.log(`✅ Setting city content for ${citySlug}`);
-            setCityContent(pages[0].content.rendered);
+          const data = await response.json();
+          if (data.content) {
+            console.log(`✅ Loaded content for ${citySlug}`);
+            setCityContent(data.content);
           } else {
-            console.log(`⚠️ No WordPress page found for stages-${citySlug}`);
+            console.log(`⚠️ No content found for ${citySlug}`);
           }
         } else {
-          console.error(`❌ WordPress API error: ${response.status}`);
+          console.log(`⚠️ No content available for ${citySlug}`);
         }
       } catch (err) {
         console.error('❌ Error fetching city content:', err);
