@@ -39,23 +39,27 @@ export default function StagesResultsPage() {
         setLoadingContent(true);
         const apiUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://admin.digitalwebsuccess.com/wp-json/wp/v2';
 
-        // Fetch all pages and filter by slug pattern (handles -2, -3 suffixes)
-        const response = await fetch(`${apiUrl}/pages?status=publish&per_page=100`);
+        console.log(`🔍 Fetching WordPress content for city: ${citySlug}`);
+        console.log(`📡 API URL: ${apiUrl}/pages?slug=stages-${citySlug}`);
+
+        // Fetch specific page by slug directly
+        const response = await fetch(`${apiUrl}/pages?slug=stages-${citySlug}&status=publish`);
 
         if (response.ok) {
           const pages: WordPressPage[] = await response.json();
-          // Find page with slug starting with stages-{city}
-          const cityPage = pages.find(page =>
-            page.slug === `stages-${citySlug}` ||
-            page.slug.startsWith(`stages-${citySlug}-`)
-          );
+          console.log(`✅ Found ${pages.length} pages for stages-${citySlug}`);
 
-          if (cityPage) {
-            setCityContent(cityPage.content.rendered);
+          if (pages.length > 0) {
+            console.log(`✅ Setting city content for ${citySlug}`);
+            setCityContent(pages[0].content.rendered);
+          } else {
+            console.log(`⚠️ No WordPress page found for stages-${citySlug}`);
           }
+        } else {
+          console.error(`❌ WordPress API error: ${response.status}`);
         }
       } catch (err) {
-        console.error('Error fetching city content:', err);
+        console.error('❌ Error fetching city content:', err);
       } finally {
         setLoadingContent(false);
       }
