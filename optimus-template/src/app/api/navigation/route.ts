@@ -37,8 +37,12 @@ function buildNavigationHierarchy(pages: WordPressPage[]): NavigationItem[] {
   const sortedPages = [...pages].sort((a, b) => a.menu_order - b.menu_order);
 
   // Separate parent pages (parent = 0) from child pages
-  // Exclude "homepage" from navigation (users click logo to go home)
-  const parentPages = sortedPages.filter(page => page.parent === 0 && page.slug !== 'homepage');
+  // Exclude "homepage" and city-specific pages (stages-*) from navigation
+  const parentPages = sortedPages.filter(page =>
+    page.parent === 0 &&
+    page.slug !== 'homepage' &&
+    !page.slug.startsWith('stages-')
+  );
   const childPages = sortedPages.filter(page => page.parent !== 0);
 
   // Build navigation structure

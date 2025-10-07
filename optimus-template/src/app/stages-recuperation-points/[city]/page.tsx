@@ -39,13 +39,19 @@ export default function StagesResultsPage() {
         setLoadingContent(true);
         const apiUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://admin.digitalwebsuccess.com/wp-json/wp/v2';
 
-        // Fetch WordPress page with slug pattern: stages-{city}
-        const response = await fetch(`${apiUrl}/pages?slug=stages-${citySlug}&status=publish`);
+        // Fetch all pages and filter by slug pattern (handles -2, -3 suffixes)
+        const response = await fetch(`${apiUrl}/pages?status=publish&per_page=100`);
 
         if (response.ok) {
           const pages: WordPressPage[] = await response.json();
-          if (pages.length > 0) {
-            setCityContent(pages[0].content.rendered);
+          // Find page with slug starting with stages-{city}
+          const cityPage = pages.find(page =>
+            page.slug === `stages-${citySlug}` ||
+            page.slug.startsWith(`stages-${citySlug}-`)
+          );
+
+          if (cityPage) {
+            setCityContent(cityPage.content.rendered);
           }
         }
       } catch (err) {
