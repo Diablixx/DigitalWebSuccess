@@ -1,6 +1,5 @@
 'use client';
 
-import { useCities } from '@/hooks/useCities';
 import CitySearchBar from './CitySearchBar';
 
 interface FiltersSidebarProps {
@@ -10,6 +9,7 @@ interface FiltersSidebarProps {
   onCitiesChange: (cities: string[]) => void;
   onSortChange: (sortBy: 'date' | 'price' | 'proximite', sortOrder: 'asc' | 'desc') => void;
   showProximitySort?: boolean; // Only show proximity option when searching with coordinates
+  availableCities?: string[]; // Cities to display in filter (proximity-filtered)
 }
 
 export default function FiltersSidebar({
@@ -19,8 +19,8 @@ export default function FiltersSidebar({
   onCitiesChange,
   onSortChange,
   showProximitySort = false,
+  availableCities = [],
 }: FiltersSidebarProps) {
-  const { cities } = useCities();
 
   const handleCityToggle = (city: string) => {
     if (selectedCities.includes(city)) {
@@ -114,7 +114,7 @@ export default function FiltersSidebar({
 
           {/* Individual city checkboxes */}
           <div className="space-y-2">
-            {cities.map((city) => (
+            {availableCities.map((city) => (
               <label key={city} className="flex items-center cursor-pointer group">
                 <input
                   type="checkbox"

@@ -112,6 +112,14 @@ export function useStages(city?: string, filters?: StagesFilters) {
           .filter((stage) => stage.distance_km! <= radiusKm);
 
         console.log(`🎯 Found ${processedStages.length} stages within ${radiusKm}km`);
+
+        // Apply city filter AFTER proximity filter (when specific cities are selected)
+        if (filters?.cities && filters.cities.length > 0) {
+          processedStages = processedStages.filter((stage) =>
+            filters.cities!.map(c => c.toUpperCase()).includes(stage.city.toUpperCase())
+          );
+          console.log(`📍 Filtered to ${processedStages.length} stages in selected cities`);
+        }
       }
 
       // Sort

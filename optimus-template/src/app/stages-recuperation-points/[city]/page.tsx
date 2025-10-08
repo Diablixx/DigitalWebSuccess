@@ -39,6 +39,11 @@ export default function StagesResultsPage() {
     radiusKm: 30, // 30km radius for proximity
   });
 
+  // Extract unique cities from proximity-filtered stages (for sidebar filter)
+  const availableCities = Array.from(
+    new Set(stages.map((stage) => stage.city))
+  ).sort();
+
   // Fetch city-specific WordPress content via internal API
   useEffect(() => {
     async function fetchCityContent() {
@@ -104,6 +109,7 @@ export default function StagesResultsPage() {
               onCitiesChange={setSelectedCities}
               onSortChange={handleSortChange}
               showProximitySort={hasProximity}
+              availableCities={availableCities}
             />
 
             {/* Center Column - Results */}
