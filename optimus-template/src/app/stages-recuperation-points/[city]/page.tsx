@@ -31,18 +31,26 @@ export default function StagesResultsPage() {
   const cityCoords = city ? getCityCoordinates(city) : null;
   const hasProximity = city ? hasCityCoordinates(city) : false;
 
-  const { stages, loading, error } = useStages(city, {
-    cities: selectedCities,
+  // Fetch ALL proximity stages WITHOUT city filter (for building city list)
+  const { stages: allProximityStages, loading, error } = useStages(city, {
     sortBy,
     sortOrder,
     searchCityCoords: cityCoords || undefined,
     radiusKm: 30, // 30km radius for proximity
+    // NO cities filter here - we want all proximity results
   });
 
-  // Extract unique cities from proximity-filtered stages (for sidebar filter)
+  // Extract unique cities from UNFILTERED proximity stages (for sidebar filter)
   const availableCities = Array.from(
-    new Set(stages.map((stage) => stage.city))
+    new Set(allProximityStages.map((stage) => stage.city))
   ).sort();
+
+  // Apply city filter CLIENT-SIDE for display (keep sidebar cities unchanged)
+  const stages = selectedCities.length > 0
+    ? allProximityStages.filter((stage) =>
+        selectedCities.map(c => c.toUpperCase()).includes(stage.city.toUpperCase())
+      )
+    : allProximityStages;
 
   // Fetch city-specific WordPress content via internal API
   useEffect(() => {
