@@ -7,6 +7,7 @@ import FiltersSidebar from '@/components/stages/FiltersSidebar';
 import StageCard from '@/components/stages/StageCard';
 import EngagementsSidebar from '@/components/stages/EngagementsSidebar';
 import { useStages } from '@/hooks/useStages';
+import { getCityCoordinates, hasCityCoordinates } from '@/lib/cityCoordinates';
 
 interface WordPressPage {
   id: number;
@@ -21,15 +22,21 @@ export default function StagesResultsPage() {
   const citySlug = (params.city as string)?.toLowerCase();
 
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<'date' | 'price'>('date');
+  const [sortBy, setSortBy] = useState<'date' | 'price' | 'proximite'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [cityContent, setCityContent] = useState<string | null>(null);
   const [loadingContent, setLoadingContent] = useState(true);
+
+  // Check if proximity filtering is available for this city
+  const cityCoords = city ? getCityCoordinates(city) : null;
+  const hasProximity = city ? hasCityCoordinates(city) : false;
 
   const { stages, loading, error } = useStages(city, {
     cities: selectedCities,
     sortBy,
     sortOrder,
+    searchCityCoords: cityCoords || undefined,
+    radiusKm: 30, // 30km radius for proximity
   });
 
   // Fetch city-specific WordPress content via internal API
@@ -66,7 +73,7 @@ export default function StagesResultsPage() {
     }
   }, [citySlug]);
 
-  const handleSortChange = (newSortBy: 'date' | 'price', newSortOrder: 'asc' | 'desc') => {
+  const handleSortChange = (newSortBy: 'date' | 'price' | 'proximite', newSortOrder: 'asc' | 'desc') => {
     setSortBy(newSortBy);
     setSortOrder(newSortOrder);
   };
@@ -96,6 +103,7 @@ export default function StagesResultsPage() {
               sortOrder={sortOrder}
               onCitiesChange={setSelectedCities}
               onSortChange={handleSortChange}
+              showProximitySort={hasProximity}
             />
 
             {/* Center Column - Results */}
@@ -123,6 +131,18 @@ export default function StagesResultsPage() {
                   />
                   <span className="ml-2">Prix</span>
                 </label>
+                {hasProximity && (
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="sort-inline"
+                      checked={sortBy === 'proximite'}
+                      onChange={() => handleSortChange('proximite', 'asc')}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="ml-2">Proximité</span>
+                  </label>
+                )}
               </div>
 
               {/* Results List */}

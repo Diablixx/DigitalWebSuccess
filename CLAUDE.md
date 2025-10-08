@@ -31,27 +31,53 @@ The OPTIMUS project is a comprehensive AI-powered content management system cons
 **Public Display**: Next.js on www.digitalwebsuccess.com fetches from admin.digitalwebsuccess.com REST API every 30 seconds
 **Hosting**: WordPress headless on o2switch cPanel + Next.js on Vercel with custom domain
 
-## 🚀 CURRENT IMPLEMENTATION STATUS (January 2025)
+## 🚀 CURRENT IMPLEMENTATION STATUS (October 2025)
 
 ### ✅ COMPLETED COMPONENTS:
-- **✅ WordPress Headless Setup**: admin.digitalwebsuccess.com fully configured and working
-- **✅ Next.js Deployment**: www.digitalwebsuccess.com live on Vercel with custom domain
-- **✅ WordPress API Integration**: BlogMegaMenu fetches from admin.digitalwebsuccess.com/wp-json/wp/v2
-- **✅ WordPress-Driven Navigation**: Dynamic navigation with parent/child pages and mega menus
+
+#### Homepage & Branding (October 2025)
+- **✅ ProStages Branding**: Temporary rebranding from "Optimus" to "ProStages" with red "Permis" badge
+- **✅ Hero Section Redesign**: Full-width dark gradient background (560px min-height)
+- **✅ WordPress Content Splitting**: Single "Homepage" page with `[SEARCH_BAR]` delimiter
+  - Content above search bar: Headline and subtitle (fetched from WordPress)
+  - Content below search bar: Full page description (fetched from WordPress)
+- **✅ Search Bar Redesign**: White input + red gradient "Rechercher" button matching design specs
+- **✅ Sticky Header**: Two-bar navigation (thin top bar + dark main nav)
+  - Top bar: ProStages logo, center text, Espace Client
+  - Dark nav: WordPress dynamic menus + blue "Aide et Contact" button
+
+#### Navigation & WordPress Integration
+- **✅ WordPress-Driven Navigation**: Dynamic menus from WordPress with mega menu support
+- **✅ Navigation Filtering**: Auto-excludes "homepage" and "stages-*" pages from menu
+- **✅ BlogMegaMenu**: Fetches from admin.digitalwebsuccess.com REST API
+- **✅ Real-time Updates**: 30-second polling for WordPress content changes
+
+#### Stages Récupération Points Feature
+- **✅ Full Search & Booking System**: City autocomplete, results page, detail page
+- **✅ City-Specific WordPress Content**: Dynamic content below stages (e.g., stages-marseille)
+  - WordPress page pattern: `stages-{city}` (scalable for all cities)
+  - Content displays in gray section below StageCard listings
+  - Internal API proxy bypasses Mixed Content security errors
+- **✅ Mixed Content Fix**: Server-side API route (`/api/city-content/[city]`) proxies WordPress HTTP requests
+  - Browser → Next.js API (HTTPS) → WordPress (HTTP) → Browser
+  - No WordPress SSL certificate required
+
+#### Technical Infrastructure
+- **✅ WordPress Headless**: admin.digitalwebsuccess.com (o2switch, HTTP)
+- **✅ Next.js Deployment**: www.digitalwebsuccess.com (Vercel, HTTPS)
+- **✅ Internal API Proxy**: Bypasses browser Mixed Content blocking for WordPress integration
 - **✅ Environment Variables**: All production variables configured in Vercel
-- **✅ DNS Configuration**: Custom domains properly routed
-- **✅ Real-time Article Display**: WordPress posts appear in BlogMegaMenu within 30 seconds
-- **✅ Stages Récupération Points**: Full search and booking system for driving license points recovery courses
 
 ### ⚠️ PENDING CONFIGURATION:
-- **🔧 N8N Webhook**: Update to POST articles to admin.digitalwebsuccess.com (currently posts to old WordPress.com)
+- **🔧 N8N Webhook**: Update to POST articles to admin.digitalwebsuccess.com
 - **🔐 WordPress Authentication**: Create Application Password for N8N API access
-- **🧪 End-to-End Testing**: Test complete workflow from optimus-saas publish → WordPress → live site
+- **🧪 Proximity Filtering**: Implement lat/lng-based stage filtering by distance
 
 ### 📋 NEXT IMMEDIATE STEPS:
-1. Create WordPress Application Password in admin.digitalwebsuccess.com/wp-admin
-2. Update N8N publication webhook to target admin.digitalwebsuccess.com/wp-json/wp/v2/posts
-3. Test publish workflow: optimus-saas → N8N → WordPress → www.digitalwebsuccess.com
+1. Update Supabase schema with latitude/longitude columns
+2. Populate ~100 stages across 10-15 major French cities with proximity clusters
+3. Implement proximity-based filtering and sorting
+4. Add "Proximité" sort option to results page
 
 ## Critical User Instructions (MUST RETAIN)
 
@@ -91,18 +117,20 @@ Complete search and booking system for driving license points recovery courses (
 6. **Detail Page**: `/stages-recuperation-points/[city]/[id]` with full information
 7. **Validation**: "Valider" button (personal info form - future implementation)
 
-### Database Schema (Supabase)
+### Database Schema (Supabase) - UPDATED October 2025
 
 ```sql
 stages_recuperation_points {
   id: UUID (primary key)
-  city: TEXT (e.g., "MONTPELLIER")
-  postal_code: TEXT (e.g., "34000")
-  full_address: TEXT (e.g., "211 rue marius carrieu")
+  city: TEXT (e.g., "MARSEILLE", "AIX-EN-PROVENCE")
+  postal_code: TEXT (e.g., "13000", "13100")
+  full_address: TEXT (e.g., "156 rue de la république")
   location_name: TEXT (e.g., "Centre de Formation Auto-École Plus")
   date_start: DATE (course start date)
   date_end: DATE (course end date, usually next day)
   price: NUMERIC (course price in euros)
+  latitude: NUMERIC(10, 7) -- NEW: GPS latitude (e.g., 43.2965)
+  longitude: NUMERIC(10, 7) -- NEW: GPS longitude (e.g., 5.3698)
   created_at: TIMESTAMP
   updated_at: TIMESTAMP
 }
@@ -110,9 +138,11 @@ stages_recuperation_points {
 
 **Key Points:**
 - City names stored in UPPERCASE for consistency
-- Courses span 2 days (Friday-Saturday typically)
-- Prices range from €215-€259 based on location
-- All French cities supported
+- Courses span 2 days (typically consecutive weekdays or weekend)
+- Prices range from €199-€329 based on location and date
+- **NEW**: Latitude/longitude for proximity-based filtering
+- ~100 total stages across 10-15 major French metropolitan areas
+- Multiple stages per city (e.g., Marseille has ~15 different locations/dates)
 
 ### Pages & Routes
 
@@ -1105,12 +1135,13 @@ const { data, error } = await supabase
 
 **WordPress** (admin.digitalwebsuccess.com):
 - ✅ Text content (articles, blog posts)
-- ✅ Page content (Accueil, Actualités, etc.)
+- ✅ Page content (Homepage with `[SEARCH_BAR]` delimiter, Actualités, etc.)
 - ✅ Navigation menu items
-- ❌ NOT for stages data
+- ✅ **City-specific content** (stages-marseille, stages-lyon, etc.) - displayed BELOW stage listings
+- ❌ NOT for stages data (courses, dates, prices, locations)
 
 **Supabase** (ucvxfjoongglzikjlxde.supabase.co):
-- ✅ Stages de récupération de points
+- ✅ Stages de récupération de points (ALL course data with lat/lng)
 - ✅ Draft articles (optimus-saas workflow)
 - ✅ User-generated content
 - ❌ NOT for published articles (those go to WordPress)
@@ -1118,14 +1149,95 @@ const { data, error } = await supabase
 **Why Separate?**:
 1. WordPress = Client-editable content (Word-like interface)
 2. Supabase = Structured data requiring exact format
-3. Stages need precise dates, prices, locations (not free-form text)
+3. Stages need precise dates, prices, locations, GPS coordinates (not free-form text)
 4. WordPress would complicate stage management
 5. Supabase allows programmatic updates and integrations
 
 **Client Training Implications**:
 - Clients edit articles in WordPress
-- Developers/admins manage stages in Supabase
+- Clients edit city descriptions in WordPress (stages-{city} pages)
+- Developers/admins manage stages in Supabase SQL
 - Clear separation of responsibilities
+
+---
+
+### 🌍 City-Specific WordPress Content (October 2025)
+
+**Feature**: Each city results page can display custom WordPress content below stage listings.
+
+**WordPress Page Pattern**: `stages-{city}` (e.g., `stages-marseille`, `stages-lyon`)
+
+**Implementation**:
+1. Create WordPress page with title matching pattern (e.g., "Stages Marseille")
+2. Slug auto-generates as `stages-marseille`
+3. Add content describing the city, locations, benefits, etc.
+4. Content displays in gray section below all StageCard listings
+5. Automatically fetched via internal API: `/api/city-content/marseille`
+
+**Mixed Content Fix**:
+- WordPress hosted on HTTP (admin.digitalwebsuccess.com)
+- Next.js site on HTTPS (www.digitalwebsuccess.com)
+- Browser blocks HTTP requests from HTTPS pages (Mixed Content error)
+- **Solution**: Server-side API proxy at `/api/city-content/[city]`
+  - Browser requests `/api/city-content/marseille` (HTTPS, same origin ✅)
+  - Next.js server fetches from WordPress HTTP API (allowed server-side ✅)
+  - Returns content to browser (no security error ✅)
+
+**File Locations**:
+- API Route: `/optimus-template/src/app/api/city-content/[city]/route.ts`
+- Results Page: `/optimus-template/src/app/stages-recuperation-points/[city]/page.tsx`
+
+**Example WordPress Content**:
+```
+Title: Stages Marseille
+Slug: stages-marseille
+
+Content:
+<h2>Les lieux de stages à Marseille</h2>
+<p>Marseille étant une grande ville, nous avons sélectionné des lieux de stages...</p>
+```
+
+---
+
+### 🎨 Homepage Redesign (October 2025)
+
+**ProStages Branding** (Temporary):
+- Logo: "ProStages" text + red "Permis" badge
+- Replaces "Optimus" branding
+- Easy to revert when needed
+
+**Hero Section**:
+- Full-width dark gradient background (`from-gray-800 to-gray-900`)
+- Min height: 560px
+- Centered content container (max-width: 880px)
+
+**WordPress Content Split**:
+- Single "Homepage" page in WordPress
+- Delimiter: `[SEARCH_BAR]` (typed as plain text in WordPress editor)
+- Code splits content at delimiter:
+  - **Above search bar**: Headline, subtitle (large white text with shadow)
+  - **Below search bar**: Full page description (white background, prose styling)
+
+**Search Bar Design**:
+- White input field (520px max-width, 44px height)
+- Red gradient button: `#e14b3f` → `#c93a2d`
+- Text: "Rechercher" with magnifying glass icon
+- Maintains city autocomplete functionality
+
+**Header Design**:
+- **Top thin bar** (40px height, white background):
+  - Left: ProStages logo + red Permis badge
+  - Center: "Stage de Récupération de Points" (uppercase gray text)
+  - Right: User icon + "Espace Client" link
+- **Main dark nav** (56px height, #222222 background):
+  - Left: WordPress dynamic menu items (white uppercase text)
+  - Right: "Qui Sommes-Nous" + blue "Aide et Contact" button (#2b85c9)
+- Sticky behavior: stays at top on scroll
+
+**File Locations**:
+- Homepage: `/optimus-template/src/app/page.tsx`
+- Header: `/optimus-template/src/components/layout/Header.tsx`
+- Search Bar: `/optimus-template/src/components/stages/CitySearchBar.tsx`
 
 ---
 

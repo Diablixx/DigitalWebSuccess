@@ -59,6 +59,11 @@ export default function StageCard({ stage }: StageCardProps) {
             <p className="text-sm text-gray-600 mb-1 whitespace-nowrap">
               {dateDisplay}
             </p>
+            {stage.distance_km !== undefined && (
+              <p className="text-xs text-gray-500 mb-1">
+                à {stage.distance_km} km
+              </p>
+            )}
             <Link
               href={`/stages-recuperation-points/${citySlug}/${stage.id}`}
               className="text-sm text-blue-700 hover:text-blue-900 inline-flex items-center gap-1"

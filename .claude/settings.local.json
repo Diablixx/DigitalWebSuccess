@@ -47,7 +47,9 @@
       "WebFetch(domain:admin.digitalwebsuccess.com)",
       "Bash(git init:*)",
       "Bash(git branch:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(code:*)",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "ask": []

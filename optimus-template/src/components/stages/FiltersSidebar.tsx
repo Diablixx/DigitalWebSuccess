@@ -5,10 +5,11 @@ import CitySearchBar from './CitySearchBar';
 
 interface FiltersSidebarProps {
   selectedCities: string[];
-  sortBy: 'date' | 'price';
+  sortBy: 'date' | 'price' | 'proximite';
   sortOrder: 'asc' | 'desc';
   onCitiesChange: (cities: string[]) => void;
-  onSortChange: (sortBy: 'date' | 'price', sortOrder: 'asc' | 'desc') => void;
+  onSortChange: (sortBy: 'date' | 'price' | 'proximite', sortOrder: 'asc' | 'desc') => void;
+  showProximitySort?: boolean; // Only show proximity option when searching with coordinates
 }
 
 export default function FiltersSidebar({
@@ -17,6 +18,7 @@ export default function FiltersSidebar({
   sortOrder,
   onCitiesChange,
   onSortChange,
+  showProximitySort = false,
 }: FiltersSidebarProps) {
   const { cities } = useCities();
 
@@ -72,6 +74,22 @@ export default function FiltersSidebar({
               Prix
             </span>
           </label>
+
+          {/* Proximity sorting - only show when proximity data is available */}
+          {showProximitySort && (
+            <label className="flex items-center cursor-pointer group">
+              <input
+                type="radio"
+                name="sort"
+                checked={sortBy === 'proximite'}
+                onChange={() => onSortChange('proximite', 'asc')}
+                className="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500"
+              />
+              <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900">
+                Proximité
+              </span>
+            </label>
+          )}
         </div>
       </div>
 
