@@ -34,19 +34,12 @@ export default function StageCard({ stage }: StageCardProps) {
   const dateDisplay = formatDateRange(stage.date_start, stage.date_end);
   const citySlug = stage.city.toLowerCase();
 
-  const handleSelect = () => {
-    // Handle selection - for now just alert, can be extended later
-    alert('Formulaire d\'inscription à venir');
-    setIsModalOpen(false);
-  };
-
   return (
     <>
       <StageDetailsModal
         stage={stage}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSelect={handleSelect}
       />
     <article className="bg-white border border-gray-200 rounded hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
       <div className="flex items-center h-[84px] relative">
@@ -97,8 +90,8 @@ export default function StageCard({ stage }: StageCardProps) {
           <div className="text-2xl font-bold text-gray-900">
             {stage.price.toFixed(0)} €
           </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
+          <Link
+            href={`/stages-recuperation-points/${citySlug}/${stage.id}/inscription`}
             className="
               bg-gradient-to-b from-green-500 to-green-600
               text-white font-semibold text-sm
@@ -108,11 +101,11 @@ export default function StageCard({ stage }: StageCardProps) {
               transition-all duration-150
               shadow-sm
               whitespace-nowrap
-              cursor-pointer
+              inline-block text-center
             "
           >
             Sélectionner
-          </button>
+          </Link>
         </div>
       </div>
     </article>

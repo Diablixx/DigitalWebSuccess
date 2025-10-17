@@ -1,17 +1,17 @@
 'use client';
 
 import { useEffect } from 'react';
-
+import { useRouter } from 'next/navigation';
 import { Stage } from '@/hooks/useStages';
 
 interface StageDetailsModalProps {
   stage: Stage;
   isOpen: boolean;
   onClose: () => void;
-  onSelect: () => void;
 }
 
-export default function StageDetailsModal({ stage, isOpen, onClose, onSelect }: StageDetailsModalProps) {
+export default function StageDetailsModal({ stage, isOpen, onClose }: StageDetailsModalProps) {
+  const router = useRouter();
   // Close modal on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -195,7 +195,10 @@ export default function StageDetailsModal({ stage, isOpen, onClose, onSelect }: 
 
           {/* Sélectionner Button */}
           <button
-            onClick={onSelect}
+            onClick={() => {
+              const citySlug = stage.city.toLowerCase();
+              router.push(`/stages-recuperation-points/${citySlug}/${stage.id}/inscription`);
+            }}
             className="w-full rounded-md shadow-lg transition-all duration-200 hover:shadow-xl active:scale-95"
             style={{
               background: 'linear-gradient(to bottom, #61b14a, #449a2f)',
