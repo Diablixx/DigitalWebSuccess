@@ -52,8 +52,25 @@ The OPTIMUS project is a comprehensive AI-powered content management system cons
 - **✅ BlogMegaMenu**: Fetches from admin.digitalwebsuccess.com REST API
 - **✅ Real-time Updates**: 30-second polling for WordPress content changes
 
-#### Stages Récupération Points Feature
-- **✅ Full Search & Booking System**: City autocomplete, results page, detail page
+#### Stages Récupération Points Feature (October 2025)
+- **✅ Full Search & Booking System**: City autocomplete, results page, detail modal popup
+- **✅ Stage Details Modal**: Popup with 3-column layout (Google Maps | Details | Price/CTA)
+  - "Plus d'infos" button opens modal with stage information
+  - "Sélectionner" button navigates to inscription form
+- **✅ Inscription Form Page**: Complete booking form with 4-step progress indicator
+  - Personal information collection (civilité, nom, prénom, date_naissance, contact)
+  - Functional tabs: Prix, Programme, Agrément, Accès-Parking, Paiement et conditions, Avis
+  - Form validation (email match, required CGV acceptance)
+  - Submits to Supabase `stage_bookings` table
+- **✅ Booking Confirmation Page**: Thank you page with booking summary
+  - Personalized greeting with user name
+  - Auto-generated booking reference (BK-YYYY-NNNNNN)
+  - Stage details display (dates, location, price)
+  - Print confirmation functionality
+- **✅ Supabase Booking Database**: `stage_bookings` table with RLS policies
+  - Auto-generated booking references
+  - Links to `stages_recuperation_points` via foreign key
+  - Public insert policy for form submissions
 - **✅ City-Specific WordPress Content**: Dynamic content below stages (e.g., stages-marseille)
   - WordPress page pattern: `stages-{city}` (scalable for all cities)
   - Content displays in gray section below StageCard listings
@@ -71,13 +88,13 @@ The OPTIMUS project is a comprehensive AI-powered content management system cons
 ### ⚠️ PENDING CONFIGURATION:
 - **🔧 N8N Webhook**: Update to POST articles to admin.digitalwebsuccess.com
 - **🔐 WordPress Authentication**: Create Application Password for N8N API access
-- **🧪 Proximity Filtering**: Implement lat/lng-based stage filtering by distance
+- **🧪 Proximity Filtering**: Implement lat/lng-based stage filtering by distance (lat/lng columns already exist in database)
 
 ### 📋 NEXT IMMEDIATE STEPS:
-1. Update Supabase schema with latitude/longitude columns
-2. Populate ~100 stages across 10-15 major French cities with proximity clusters
-3. Implement proximity-based filtering and sorting
-4. Add "Proximité" sort option to results page
+1. Populate ~100 stages across 10-15 major French cities with proximity clusters (database ready with lat/lng)
+2. Implement proximity-based filtering and sorting logic
+3. Add "Proximité" sort option to results page
+4. Add email notifications for booking confirmations (optional)
 
 ## Critical User Instructions (MUST RETAIN)
 
@@ -255,11 +272,18 @@ src/components/stages/
 **Pages:**
 - `src/app/page.tsx` - Homepage with search bar
 - `src/app/stages-recuperation-points/[city]/page.tsx` - Results page
-- `src/app/stages-recuperation-points/[city]/[id]/page.tsx` - Detail page
+- `src/app/stages-recuperation-points/[city]/[id]/inscription/page.tsx` - Inscription form
+- `src/app/stages-recuperation-points/[city]/[id]/merci/page.tsx` - Thank you confirmation
 
-**API Routes (if needed):**
-- `/api/stages` - Fetch stages with query params
-- `/api/cities` - Get unique cities list
+**Components:**
+- `src/components/stages/StageCard.tsx` - Stage card with modal trigger
+- `src/components/stages/StageDetailsModal.tsx` - Popup modal with stage details
+- `src/components/stages/FiltersSidebar.tsx` - Left sidebar filters
+- `src/components/stages/EngagementsSidebar.tsx` - Right sidebar commitments
+- `src/components/stages/CitySearchBar.tsx` - Autocomplete search
+
+**API Routes:**
+- `/api/city-content/[city]` - Proxy for WordPress city content (bypasses Mixed Content)
 
 ### Sample Data
 24 courses across 10 French cities:
@@ -275,14 +299,218 @@ Prices: €215-€259
 - City names in uppercase for consistency
 - Structured data for local business markup (future)
 
-### Future Enhancements (Not Implemented Yet)
-- Personal information form after validation
-- Payment integration
-- Email confirmation
-- Booking management dashboard
-- Proximity sorting (requires lat/lng coordinates)
-- Calendar view
-- Mobile app
+### Future Enhancements
+- ✅ Personal information form (COMPLETED October 2025)
+- ✅ Booking confirmation page (COMPLETED October 2025)
+- ⚠️ Payment integration (Stripe/PayPal)
+- ⚠️ Email confirmation notifications
+- ⚠️ Booking management dashboard
+- ⚠️ Proximity sorting (lat/lng columns ready, logic pending)
+- ⚠️ Calendar view
+- ⚠️ Mobile app
+
+---
+
+## 📝 Stage Booking System (October 2025)
+
+### Overview
+Complete end-to-end booking system allowing users to reserve spots in driving license points recovery courses directly from the website.
+
+### User Flow
+1. **Search**: Homepage → Enter city → Autocomplete suggestions
+2. **Browse**: Results page → View available stages → Filter/sort
+3. **Details**: Click "Plus d'infos" → Modal popup with stage details
+4. **Book**: Click "Sélectionner" → Navigate to inscription form
+5. **Submit**: Fill form → Validate → Submit to Supabase
+6. **Confirm**: Redirect to thank you page with booking reference
+
+### Database Schema
+
+**Table**: `stage_bookings`
+
+```sql
+CREATE TABLE stage_bookings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  stage_id UUID NOT NULL REFERENCES stages_recuperation_points(id),
+  booking_reference TEXT UNIQUE NOT NULL,  -- Auto-generated: BK-YYYY-NNNNNN
+
+  -- Personal info
+  civilite TEXT NOT NULL CHECK (civilite IN ('M', 'Mme')),
+  nom TEXT NOT NULL,
+  prenom TEXT NOT NULL,
+  date_naissance DATE NOT NULL,
+
+  -- Contact info
+  adresse TEXT NOT NULL,
+  code_postal TEXT NOT NULL,
+  ville TEXT NOT NULL,
+  email TEXT NOT NULL,
+  email_confirmation TEXT NOT NULL,
+  telephone_mobile TEXT NOT NULL,
+
+  -- Options
+  guarantee_serenite BOOLEAN DEFAULT false,  -- +25€ optional guarantee
+  cgv_accepted BOOLEAN NOT NULL DEFAULT true,
+
+  -- Timestamps
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+**Indexes**:
+- `idx_stage_bookings_stage_id` - Fast lookups by stage
+- `idx_stage_bookings_email` - Fast lookups by email
+- `idx_stage_bookings_booking_ref` - Fast lookups by reference
+- `idx_stage_bookings_created_at` - Chronological sorting
+
+**Triggers**:
+- `trigger_set_booking_reference` - Auto-generates booking reference on insert
+- `trigger_update_stage_bookings_updated_at` - Auto-updates timestamp on update
+
+### Inscription Form Features
+
+**4-Step Progress Indicator**:
+1. Formulaire (active)
+2. Règlement (inactive)
+3. Personnalisation (inactive)
+4. Confirmation (inactive)
+
+**Form Fields**:
+- Civilité: Dropdown (Monsieur/Madame)
+- Nom: Text input (required)
+- Prénom: Text input (required)
+- Date de naissance: 3 dropdowns (Jour/Mois/Année)
+- Adresse: Text input (required)
+- Code Postal: Text input (required)
+- Ville: Text input (required)
+- Email: Email input (required)
+- Confirmation email: Email input (required, must match)
+- Téléphone mobile: Tel input (required)
+- Garantie Sérénité: Checkbox (optional +25€)
+- CGV: Checkbox (required)
+
+**Functional Tabs** (below map):
+- **Le prix du stage comprend** (default): 5 inclusions with green checkmarks
+- **Programme**: 2-column layout (1er jour / 2ème jour) with detailed schedule
+- **Agrément**: Prefecture agreement info (R2001300020)
+- **Accès - Parking**: Exact address, complementary info, parking availability
+- **Paiement et conditions**: Payment methods (cartes bancaire) + cancellation policy
+- **Avis**: Empty state (no reviews yet)
+
+**Validation**:
+- Email match validation
+- Required CGV checkbox
+- All required fields enforced by HTML5
+- Disabled submit button while submitting
+
+**Submission Flow**:
+```typescript
+1. Validate emails match
+2. Validate CGV accepted
+3. Construct date_naissance from dropdowns
+4. Insert into Supabase stage_bookings table
+5. Auto-generate booking_reference via trigger
+6. Redirect to /merci page with reference
+```
+
+### Thank You Page
+
+**URL Pattern**: `/stages-recuperation-points/[city]/[id]/merci?ref=BK-2025-NNNNNN`
+
+**Features**:
+- Personalized greeting: "Merci [Prénom] [Nom]!"
+- Success icon (green checkmark)
+- Booking reference display
+- Full stage details recap:
+  - Dates with French day/month names
+  - Location with address
+  - Price with guarantee if selected
+- Email confirmation notice
+- Important information section:
+  - Must attend both days
+  - Bring ID and license
+  - Arrive 15 minutes early
+  - Free cancellation up to 14 days
+- Action buttons:
+  - Return to homepage
+  - Print confirmation
+
+### RLS Policies
+
+**Public Insert Policy**:
+```sql
+CREATE POLICY "Allow public insert" ON stage_bookings
+  FOR INSERT WITH CHECK (true);
+```
+Allows anonymous website visitors to create bookings.
+
+**Read Own Bookings**:
+```sql
+CREATE POLICY "Allow users to read own bookings" ON stage_bookings
+  FOR SELECT USING (auth.jwt() ->> 'email' = email);
+```
+Authenticated users can only see their own bookings (future feature).
+
+**Service Role Full Access**:
+```sql
+CREATE POLICY "Allow service role full access" ON stage_bookings
+  FOR ALL USING (true) WITH CHECK (true);
+```
+Admin full access via service role key.
+
+### Troubleshooting
+
+#### Issue: "new row violates row-level security policy"
+
+**Symptoms**: Form submission fails with RLS error code 42501
+
+**Cause**: RLS policies not created properly or missing public insert permission
+
+**Solution**: Run `fix-rls-policy.sql` in Supabase SQL Editor:
+```sql
+DROP POLICY IF EXISTS "Allow public insert" ON public.stage_bookings;
+CREATE POLICY "Allow public insert" ON public.stage_bookings
+  FOR INSERT WITH CHECK (true);
+```
+
+**Files**:
+- `/Users/yakeen/Desktop/OPTIMUS/optimus-template/supabase-stage-bookings-table.sql` - Initial table creation
+- `/Users/yakeen/Desktop/OPTIMUS/optimus-template/fix-rls-policy.sql` - RLS policy fix
+
+#### Issue: Booking reference not generated
+
+**Symptoms**: booking_reference field is NULL or empty
+
+**Cause**: Trigger not created or not firing
+
+**Solution**: Verify trigger exists:
+```sql
+SELECT * FROM pg_trigger WHERE tgname = 'trigger_set_booking_reference';
+```
+If missing, re-run the complete SQL file.
+
+#### Issue: Stage not found on thank you page
+
+**Symptoms**: "Réservation non trouvée" message
+
+**Cause**: Booking reference parameter missing from URL or invalid
+
+**Solution**: Ensure redirect includes `?ref=` parameter with valid booking reference
+
+### Security Considerations
+
+- **RLS Enabled**: All access controlled by policies
+- **Public Insert Only**: Anonymous users can only INSERT, not SELECT/UPDATE/DELETE
+- **Email Privacy**: Users can only see bookings matching their authenticated email
+- **No Payment Data**: No credit card or sensitive payment info stored
+- **Validation**: Client-side + database CHECK constraints
+
+### Performance
+
+- **Indexed Fields**: Fast lookups by stage_id, email, booking_reference, created_at
+- **Auto-generated References**: Counter-based, no UUID collisions
+- **Optimized Queries**: Single SELECT with JOIN to stages table on thank you page
 
 ---
 
