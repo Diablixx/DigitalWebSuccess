@@ -10,6 +10,7 @@ export default function InscriptionPage() {
   const stageId = params.id as string;
   const [stage, setStage] = useState<Stage | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<string>('prix');
 
   useEffect(() => {
     async function fetchStage() {
@@ -219,58 +220,257 @@ export default function InscriptionPage() {
             {/* Tabs */}
             <div className="bg-white border rounded-lg mb-6">
               <div className="flex border-b">
-                <button className="px-4 py-3 text-sm font-medium text-white bg-red-600 border-b-2 border-red-600">
+                <button
+                  onClick={() => setActiveTab('prix')}
+                  className={`px-4 py-3 text-sm font-medium ${
+                    activeTab === 'prix'
+                      ? 'text-white bg-red-600 border-b-2 border-red-600'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
                   Le prix du stage comprend
                 </button>
-                <button className="px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                <button
+                  onClick={() => setActiveTab('programme')}
+                  className={`px-4 py-3 text-sm font-medium ${
+                    activeTab === 'programme'
+                      ? 'text-white bg-red-600 border-b-2 border-red-600'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
                   Programme
                 </button>
-                <button className="px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                <button
+                  onClick={() => setActiveTab('agrement')}
+                  className={`px-4 py-3 text-sm font-medium ${
+                    activeTab === 'agrement'
+                      ? 'text-white bg-red-600 border-b-2 border-red-600'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
                   Agrément
                 </button>
-                <button className="px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                <button
+                  onClick={() => setActiveTab('acces')}
+                  className={`px-4 py-3 text-sm font-medium ${
+                    activeTab === 'acces'
+                      ? 'text-white bg-red-600 border-b-2 border-red-600'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
                   Accès - Parking
                 </button>
-                <button className="px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                <button
+                  onClick={() => setActiveTab('paiement')}
+                  className={`px-4 py-3 text-sm font-medium ${
+                    activeTab === 'paiement'
+                      ? 'text-white bg-red-600 border-b-2 border-red-600'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
                   Paiement et conditions
                 </button>
-                <button className="px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                <button
+                  onClick={() => setActiveTab('avis')}
+                  className={`px-4 py-3 text-sm font-medium ${
+                    activeTab === 'avis'
+                      ? 'text-white bg-red-600 border-b-2 border-red-600'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
                   Avis
                 </button>
               </div>
+
               <div className="p-4">
-                <ul className="space-y-2">
-                  <li className="flex items-start text-sm text-gray-700">
-                    <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    14 heures de formation
-                  </li>
-                  <li className="flex items-start text-sm text-gray-700">
-                    <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    L'attestation de stage remise le deuxième jour
-                  </li>
-                  <li className="flex items-start text-sm text-gray-700">
-                    <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    La récupération automatique de 4 points
-                  </li>
-                  <li className="flex items-start text-sm text-gray-700">
-                    <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    Le traitement de votre dossier administratif en préfecture
-                  </li>
-                  <li className="flex items-start text-sm text-gray-700">
-                    <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    En cas d'empêchement, le transfert sur un autre stage
-                  </li>
-                </ul>
+                {/* Le prix du stage comprend */}
+                {activeTab === 'prix' && (
+                  <ul className="space-y-2">
+                    <li className="flex items-start text-sm text-gray-700">
+                      <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      14 heures de formation
+                    </li>
+                    <li className="flex items-start text-sm text-gray-700">
+                      <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      L'attestation de stage remise le deuxième jour
+                    </li>
+                    <li className="flex items-start text-sm text-gray-700">
+                      <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      La récupération automatique de 4 points
+                    </li>
+                    <li className="flex items-start text-sm text-gray-700">
+                      <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      Le traitement de votre dossier administratif en préfecture
+                    </li>
+                    <li className="flex items-start text-sm text-gray-700">
+                      <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      En cas d'empêchement, le transfert sur un autre stage
+                    </li>
+                  </ul>
+                )}
+
+                {/* Programme */}
+                {activeTab === 'programme' && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-8">
+                      {/* 1er jour */}
+                      <div>
+                        <h4 className="text-lg font-bold text-gray-800 mb-4">1er jour</h4>
+                        <ul className="space-y-2">
+                          <li className="flex items-start text-sm text-gray-700">
+                            <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            Accueil des stagiaires
+                          </li>
+                          <li className="flex items-start text-sm text-gray-700">
+                            <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            Tour de table et présentations
+                          </li>
+                          <li className="flex items-start text-sm text-gray-700">
+                            <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            Sécurité routière : généralités et statistiques
+                          </li>
+                          <li className="flex items-start text-sm text-gray-700">
+                            <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            La logique de l'accident
+                          </li>
+                          <li className="flex items-start text-sm text-gray-700">
+                            <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            Perception de la route par l'automobiliste
+                          </li>
+                          <li className="flex items-start text-sm text-gray-700">
+                            <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            Analyse des situations d'infraction
+                          </li>
+                        </ul>
+                      </div>
+
+                      {/* 2ème jour */}
+                      <div>
+                        <h4 className="text-lg font-bold text-gray-800 mb-4">2ème jour</h4>
+                        <ul className="space-y-2">
+                          <li className="flex items-start text-sm text-gray-700">
+                            <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            Exemple : l'analyse d'un accident
+                          </li>
+                          <li className="flex items-start text-sm text-gray-700">
+                            <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            Physique et conduite : limites de nos véhicules et conséquences
+                          </li>
+                          <li className="flex items-start text-sm text-gray-700">
+                            <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            Sensibilisation alcool au volant et stupéfiants
+                          </li>
+                          <li className="flex items-start text-sm text-gray-700">
+                            <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            Les représentations autour de la conduite
+                          </li>
+                          <li className="flex items-start text-sm text-gray-700">
+                            <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            Conclusion : synthèse et tour de table
+                          </li>
+                          <li className="flex items-start text-sm text-gray-700">
+                            <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            Remise de votre attestation de stage
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <h4 className="font-bold text-gray-800 mb-2">Important !</h4>
+                      <p className="text-sm text-gray-700">
+                        Pour que votre stage soit validé et que le centre vous délivre une attestation, vous devrez assister à{' '}
+                        <span className="font-bold">l'intégralité des deux jours de formation.</span>
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Agrément */}
+                {activeTab === 'agrement' && (
+                  <div className="text-sm text-gray-700 space-y-2">
+                    <p>Centre agréé par la préfecture du Bouches du Rhone 13 pour la ville de VITROLLES</p>
+                    <p className="font-semibold">AGRÉMENT R2001300020 ABC PERMIS. STAGE DÉLIVRÉ PAR LA PRÉFECTURE</p>
+                  </div>
+                )}
+
+                {/* Accès - Parking */}
+                {activeTab === 'acces' && (
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-bold text-gray-800 mb-2">Adresse exacte</h4>
+                      <p className="text-sm text-gray-700">{stage.full_address}</p>
+                      <p className="text-sm text-gray-700">
+                        {stage.postal_code} {stage.city}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-800 mb-2">Indications complémentaires</h4>
+                      <p className="text-sm text-gray-700">ZI les Estroublans</p>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-800 mb-2">Parking</h4>
+                      <p className="text-sm text-gray-700">Parking à proximité</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Paiement et conditions */}
+                {activeTab === 'paiement' && (
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-bold text-gray-800 mb-2">Modes de paiement acceptés</h4>
+                      <p className="text-sm text-gray-700">Cartes bancaire</p>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-800 mb-2">Conditions d'annulation</h4>
+                      <p className="text-sm text-gray-700">
+                        Annulation et transfert gratuit jusqu'à 14 jours après votre inscription (consulter les CGV pour davantage de précisions).
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Avis */}
+                {activeTab === 'avis' && (
+                  <div className="text-sm text-gray-500 text-center py-8">
+                    Aucun avis pour le moment
+                  </div>
+                )}
               </div>
             </div>
 
@@ -288,7 +488,7 @@ export default function InscriptionPage() {
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                   >
-                    <option value="">Monsieur</option>
+                    <option value="M">Monsieur</option>
                     <option value="Mme">Madame</option>
                   </select>
                 </div>
