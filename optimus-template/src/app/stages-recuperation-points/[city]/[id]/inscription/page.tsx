@@ -1,16 +1,36 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Stage } from '@/hooks/useStages';
 import { supabase } from '@/lib/supabase';
 
 export default function InscriptionPage() {
   const params = useParams();
+  const router = useRouter();
   const stageId = params.id as string;
   const [stage, setStage] = useState<Stage | null>(null);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('prix');
+
+  // Form state
+  const [formData, setFormData] = useState({
+    civilite: 'M',
+    nom: '',
+    prenom: '',
+    adresse: '',
+    code_postal: '',
+    ville: '',
+    jour_naissance: '',
+    mois_naissance: '',
+    annee_naissance: '',
+    email: '',
+    email_confirmation: '',
+    telephone_mobile: '',
+    guarantee_serenite: false,
+    cgv_accepted: false,
+  });
 
   useEffect(() => {
     async function fetchStage() {
@@ -66,9 +86,74 @@ export default function InscriptionPage() {
   // Google Maps URL
   const mapUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${stage.latitude},${stage.longitude}&zoom=15`;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Formulaire soumis - passage au paiement à implémenter');
+
+    // Validate emails match
+    if (formData.email !== formData.email_confirmation) {
+      alert('Les adresses email ne correspondent pas');
+      return;
+    }
+
+    // Validate CGV accepted
+    if (!formData.cgv_accepted) {
+      alert('Vous devez accepter les conditions générales de vente');
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      // Create date of birth
+      const dateNaissance = `${formData.annee_naissance}-${String(formData.mois_naissance).padStart(2, '0')}-${String(formData.jour_naissance).padStart(2, '0')}`;
+
+      // Insert booking into Supabase
+      const { data, error } = await supabase
+        .from('stage_bookings')
+        .insert({
+          stage_id: stageId,
+          civilite: formData.civilite,
+          nom: formData.nom,
+          prenom: formData.prenom,
+          date_naissance: dateNaissance,
+          adresse: formData.adresse,
+          code_postal: formData.code_postal,
+          ville: formData.ville,
+          email: formData.email,
+          email_confirmation: formData.email_confirmation,
+          telephone_mobile: formData.telephone_mobile,
+          guarantee_serenite: formData.guarantee_serenite,
+          cgv_accepted: formData.cgv_accepted,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error inserting booking:', error);
+        alert('Erreur lors de l\'inscription. Veuillez réessayer.');
+        setSubmitting(false);
+        return;
+      }
+
+      // Redirect to thank you page with booking reference
+      const citySlug = stage.city.toLowerCase();
+      router.push(`/stages-recuperation-points/${citySlug}/${stageId}/merci?ref=${data.booking_reference}`);
+    } catch (err) {
+      console.error('Error submitting form:', err);
+      alert('Erreur lors de l\'inscription. Veuillez réessayer.');
+      setSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData((prev) => ({ ...prev, [name]: checked }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   return (
@@ -485,6 +570,9 @@ export default function InscriptionPage() {
                     Civilité <span className="text-red-600">*</span>
                   </label>
                   <select
+                    name="civilite"
+                    value={formData.civilite}
+                    onChange={handleInputChange}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                   >
@@ -500,6 +588,9 @@ export default function InscriptionPage() {
                   </label>
                   <input
                     type="text"
+                    name="nom"
+                    value={formData.nom}
+                    onChange={handleInputChange}
                     required
                     placeholder="Votre nom tel qu'il figure sur votre permis"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -513,6 +604,9 @@ export default function InscriptionPage() {
                   </label>
                   <input
                     type="text"
+                    name="prenom"
+                    value={formData.prenom}
+                    onChange={handleInputChange}
                     required
                     placeholder="Votre prénom"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -526,6 +620,9 @@ export default function InscriptionPage() {
                   </label>
                   <input
                     type="text"
+                    name="adresse"
+                    value={formData.adresse}
+                    onChange={handleInputChange}
                     required
                     placeholder="Votre adresse"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -539,6 +636,9 @@ export default function InscriptionPage() {
                   </label>
                   <input
                     type="text"
+                    name="code_postal"
+                    value={formData.code_postal}
+                    onChange={handleInputChange}
                     required
                     placeholder="Votre code postal"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -552,6 +652,9 @@ export default function InscriptionPage() {
                   </label>
                   <input
                     type="text"
+                    name="ville"
+                    value={formData.ville}
+                    onChange={handleInputChange}
                     required
                     placeholder="Votre ville"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -565,6 +668,9 @@ export default function InscriptionPage() {
                   </label>
                   <div className="flex gap-2">
                     <select
+                      name="jour_naissance"
+                      value={formData.jour_naissance}
+                      onChange={handleInputChange}
                       required
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                     >
@@ -576,6 +682,9 @@ export default function InscriptionPage() {
                       ))}
                     </select>
                     <select
+                      name="mois_naissance"
+                      value={formData.mois_naissance}
+                      onChange={handleInputChange}
                       required
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                     >
@@ -600,6 +709,9 @@ export default function InscriptionPage() {
                       ))}
                     </select>
                     <select
+                      name="annee_naissance"
+                      value={formData.annee_naissance}
+                      onChange={handleInputChange}
                       required
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                     >
@@ -620,6 +732,9 @@ export default function InscriptionPage() {
                   </label>
                   <input
                     type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
                     required
                     placeholder="Votre adresse email"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -633,6 +748,9 @@ export default function InscriptionPage() {
                   </label>
                   <input
                     type="email"
+                    name="email_confirmation"
+                    value={formData.email_confirmation}
+                    onChange={handleInputChange}
                     required
                     placeholder="Confirmez votre adresse email"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -646,6 +764,9 @@ export default function InscriptionPage() {
                   </label>
                   <input
                     type="tel"
+                    name="telephone_mobile"
+                    value={formData.telephone_mobile}
+                    onChange={handleInputChange}
                     required
                     placeholder="Votre numéro de téléphone"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -661,6 +782,9 @@ export default function InscriptionPage() {
                   <input
                     type="checkbox"
                     id="guarantee"
+                    name="guarantee_serenite"
+                    checked={formData.guarantee_serenite}
+                    onChange={handleInputChange}
                     className="mt-1 w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
                   />
                   <label htmlFor="guarantee" className="ml-2 text-sm text-gray-700">
@@ -675,6 +799,9 @@ export default function InscriptionPage() {
                   <input
                     type="checkbox"
                     id="conditions"
+                    name="cgv_accepted"
+                    checked={formData.cgv_accepted}
+                    onChange={handleInputChange}
                     required
                     className="mt-1 w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
                   />
@@ -692,10 +819,13 @@ export default function InscriptionPage() {
               <div className="mt-8 text-right">
                 <button
                   type="submit"
-                  className="bg-gradient-to-b from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-lg px-12 py-4 rounded-md shadow-lg transition-all duration-200"
+                  disabled={submitting}
+                  className="bg-gradient-to-b from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-semibold text-lg px-12 py-4 rounded-md shadow-lg transition-all duration-200"
                 >
-                  Valider le formulaire
-                  <div className="text-xs font-normal mt-1">et passer au paiement</div>
+                  {submitting ? 'Envoi en cours...' : 'Valider le formulaire'}
+                  <div className="text-xs font-normal mt-1">
+                    {submitting ? 'Veuillez patienter' : 'et passer au paiement'}
+                  </div>
                 </button>
               </div>
             </form>
