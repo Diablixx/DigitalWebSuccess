@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { Stage } from '@/hooks/useStages';
+import StageDetailsModal from './StageDetailsModal';
 
 interface StageCardProps {
   stage: Stage;
@@ -28,10 +30,24 @@ function formatDateRange(startDate: string, endDate: string): string {
 }
 
 export default function StageCard({ stage }: StageCardProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const dateDisplay = formatDateRange(stage.date_start, stage.date_end);
   const citySlug = stage.city.toLowerCase();
 
+  const handleSelect = () => {
+    // Handle selection - for now just alert, can be extended later
+    alert('Formulaire d\'inscription à venir');
+    setIsModalOpen(false);
+  };
+
   return (
+    <>
+      <StageDetailsModal
+        stage={stage}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSelect={handleSelect}
+      />
     <article className="bg-white border border-gray-200 rounded hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
       <div className="flex items-center h-[84px] relative">
         {/* Left Red Accent Block */}
@@ -64,15 +80,15 @@ export default function StageCard({ stage }: StageCardProps) {
                 à {stage.distance_km} km
               </p>
             )}
-            <Link
-              href={`/stages-recuperation-points/${citySlug}/${stage.id}`}
-              className="text-sm text-blue-700 hover:text-blue-900 inline-flex items-center gap-1"
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="text-sm text-blue-700 hover:text-blue-900 inline-flex items-center gap-1 cursor-pointer"
             >
               <span className="inline-flex items-center justify-center w-4 h-4 bg-blue-100 rounded-full text-blue-800 text-xs font-bold">
                 i
               </span>
               <span>Plus d'infos</span>
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -81,8 +97,8 @@ export default function StageCard({ stage }: StageCardProps) {
           <div className="text-2xl font-bold text-gray-900">
             {stage.price.toFixed(0)} €
           </div>
-          <Link
-            href={`/stages-recuperation-points/${citySlug}/${stage.id}`}
+          <button
+            onClick={() => setIsModalOpen(true)}
             className="
               bg-gradient-to-b from-green-500 to-green-600
               text-white font-semibold text-sm
@@ -92,12 +108,14 @@ export default function StageCard({ stage }: StageCardProps) {
               transition-all duration-150
               shadow-sm
               whitespace-nowrap
+              cursor-pointer
             "
           >
             Sélectionner
-          </Link>
+          </button>
         </div>
       </div>
     </article>
+    </>
   );
 }
