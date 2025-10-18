@@ -44,7 +44,7 @@ export default function CitySearchBar({
       if (onCitySelect) {
         onCitySelect(city);
       } else {
-        router.push(`/stages-recuperation-points/${slug}`);
+        router.push(`/stages-recuperation-points-${slug}`);
       }
       setQuery('');
       setShowSuggestions(false);

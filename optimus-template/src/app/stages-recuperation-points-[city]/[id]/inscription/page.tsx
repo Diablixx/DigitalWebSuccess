@@ -138,7 +138,7 @@ export default function InscriptionPage() {
 
       // Redirect to thank you page with booking reference
       const citySlug = stage.city.toLowerCase();
-      router.push(`/stages-recuperation-points/${citySlug}/${stageId}/merci?ref=${data.booking_reference}`);
+      router.push(`/stages-recuperation-points-${citySlug}/${stageId}/merci?ref=${data.booking_reference}`);
     } catch (err) {
       console.error('Error submitting form:', err);
       alert('Erreur lors de l\'inscription. Veuillez réessayer.');

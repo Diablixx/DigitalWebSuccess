@@ -197,7 +197,7 @@ export default function StageDetailsModal({ stage, isOpen, onClose }: StageDetai
           <button
             onClick={() => {
               const citySlug = stage.city.toLowerCase();
-              router.push(`/stages-recuperation-points/${citySlug}/${stage.id}/inscription`);
+              router.push(`/stages-recuperation-points-${citySlug}/${stage.id}/inscription`);
             }}
             className="w-full rounded-md shadow-lg transition-all duration-200 hover:shadow-xl active:scale-95"
             style={{

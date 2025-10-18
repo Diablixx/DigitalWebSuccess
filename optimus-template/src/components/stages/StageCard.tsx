@@ -53,7 +53,7 @@ export default function StageCard({ stage }: StageCardProps) {
           {/* Left: City & Address */}
           <div className="flex-1 min-w-0">
             <Link
-              href={`/stages-recuperation-points/${citySlug}/${stage.id}`}
+              href={`/stages-recuperation-points-${citySlug}/${stage.id}`}
               className="text-lg font-semibold text-blue-700 hover:text-blue-900 hover:underline uppercase block mb-1"
             >
               {stage.city}
@@ -91,7 +91,7 @@ export default function StageCard({ stage }: StageCardProps) {
             {stage.price.toFixed(0)} €
           </div>
           <Link
-            href={`/stages-recuperation-points/${citySlug}/${stage.id}/inscription`}
+            href={`/stages-recuperation-points-${citySlug}/${stage.id}/inscription`}
             className="
               bg-gradient-to-b from-green-500 to-green-600
               text-white font-semibold text-sm

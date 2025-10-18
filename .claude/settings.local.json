@@ -50,7 +50,8 @@
       "Bash(git fetch:*)",
       "Bash(code:*)",
       "Bash(python3:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(cp:*)"
     ],
     "deny": [],
     "ask": []
