@@ -138,7 +138,7 @@ export default function CitySearchBar({
             hover:from-[#d43f33] hover:to-[#b8342a] active:shadow-inner
             transition-all duration-150 flex items-center justify-center gap-2
             border border-[#bd3a2a]
-            ${isLarge ? 'h-[44px] px-4 text-[15px] min-w-[120px]' : 'h-10 px-3 text-sm min-w-[100px]'}
+            ${isLarge ? 'h-[44px] px-4 text-[15px] min-w-[120px]' : 'h-10 w-10 text-sm'}
           `}
           style={{
             boxShadow: '0 6px 14px rgba(192, 50, 40, 0.18)',
