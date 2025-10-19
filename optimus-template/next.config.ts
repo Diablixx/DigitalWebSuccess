@@ -15,6 +15,23 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Rewrites for dash-based stage URLs
+  async rewrites() {
+    return [
+      {
+        source: '/stages-recuperation-points-:city',
+        destination: '/stages-recuperation-points/:city',
+      },
+      {
+        source: '/stages-recuperation-points-:city/:id/inscription',
+        destination: '/stages-recuperation-points/:city/:id/inscription',
+      },
+      {
+        source: '/stages-recuperation-points-:city/:id/merci',
+        destination: '/stages-recuperation-points/:city/:id/merci',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
