@@ -861,7 +861,7 @@ export default function InscriptionPage() {
             {/* Price Box */}
             <div className="bg-red-500 text-white rounded-lg p-6 mb-6 shadow-lg">
               <div className="text-center">
-                <div className="text-5xl font-bold mb-2">{Math.round(stage.price)} €</div>
+                <div className="text-5xl font-bold mb-2">{Math.round(Number(stage.price))} €</div>
                 <button className="w-full bg-gradient-to-b from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold text-base px-6 py-3 rounded-md shadow-md transition-all duration-200 mt-4">
                   Valider
                 </button>
