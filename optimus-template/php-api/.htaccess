@@ -1,0 +1,14 @@
+# Security headers
+Header set X-Content-Type-Options "nosniff"
+Header set X-Frame-Options "SAMEORIGIN"
+Header set X-XSS-Protection "1; mode=block"
+
+# Enable error reporting for debugging (disable in production)
+php_flag display_errors On
+php_value error_reporting E_ALL
+
+# Protect config file
+<Files "config.php">
+    Order allow,deny
+    Deny from all
+</Files>

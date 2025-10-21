@@ -1,12 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const API_URL = process.env.NEXT_PUBLIC_MYSQL_API_URL || 'https://admin.digitalwebsuccess.com/mysql-api';
 
 // Haversine formula to calculate distance between two coordinates in kilometers
 function calculateDistance(
@@ -36,9 +32,9 @@ export interface Stage {
   location_name: string | null;
   date_start: string;
   date_end: string;
-  price: number;
-  latitude: number;
-  longitude: number;
+  price: number | string; // PHP returns as string
+  latitude: number | string; // PHP returns as string
+  longitude: number | string; // PHP returns as string
   created_at: string;
   updated_at: string;
   distance_km?: number; // Calculated distance from searched city
@@ -62,37 +58,51 @@ export function useStages(city?: string, filters?: StagesFilters) {
       setLoading(true);
       setError(null);
 
-      console.log('📍 Loading stages from Supabase...');
+      console.log('📍 Loading stages from MySQL API...');
 
-      let query = supabase
-        .from('stages_recuperation_points')
-        .select('*');
+      // Build URL with query parameters
+      const params = new URLSearchParams();
 
-      // If proximity filtering is enabled, fetch all stages and filter by distance
-      // Otherwise, filter by city as before
-      if (filters?.searchCityCoords) {
-        // Fetch all stages (or within a broad area) for proximity calculation
-        // We'll filter by distance in JavaScript after fetching
-        console.log('🌍 Proximity filtering enabled');
-      } else {
-        // Filter by city (from URL parameter)
-        if (city) {
-          query = query.eq('city', city.toUpperCase());
-        }
-
-        // Filter by multiple cities (from filter checkboxes)
-        if (filters?.cities && filters.cities.length > 0) {
-          query = query.in('city', filters.cities.map(c => c.toUpperCase()));
-        }
+      if (city) {
+        params.append('city', city);
       }
 
-      const { data, error: fetchError } = await query;
-
-      if (fetchError) {
-        throw new Error(`Supabase error: ${fetchError.message}`);
+      if (filters?.cities && filters.cities.length > 0) {
+        params.append('cities', filters.cities.join(','));
       }
 
-      let processedStages = data || [];
+      if (filters?.sortBy) {
+        params.append('sortBy', filters.sortBy === 'date' ? 'date_start' : filters.sortBy);
+      }
+
+      if (filters?.sortOrder) {
+        params.append('sortOrder', filters.sortOrder.toUpperCase());
+      }
+
+      const url = `${API_URL}/stages.php?${params.toString()}`;
+      console.log('🔗 Fetching:', url);
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      let processedStages: Stage[] = result.data || [];
+
+      // Convert string numbers to actual numbers
+      processedStages = processedStages.map(stage => ({
+        ...stage,
+        price: parseFloat(stage.price as string),
+        latitude: parseFloat(stage.latitude as string),
+        longitude: parseFloat(stage.longitude as string),
+      }));
 
       // Calculate distances if proximity filtering is enabled
       if (filters?.searchCityCoords) {
@@ -104,33 +114,19 @@ export function useStages(city?: string, filters?: StagesFilters) {
             const distance = calculateDistance(
               searchLat,
               searchLon,
-              stage.latitude,
-              stage.longitude
+              stage.latitude as number,
+              stage.longitude as number
             );
             return { ...stage, distance_km: Math.round(distance) };
           })
           .filter((stage) => stage.distance_km! <= radiusKm);
 
         console.log(`🎯 Found ${processedStages.length} stages within ${radiusKm}km`);
-      }
 
-      // Sort
-      const sortBy = filters?.sortBy || 'date_start';
-      const sortOrder = filters?.sortOrder || 'asc';
-
-      if (sortBy === 'date') {
-        processedStages.sort((a, b) => {
-          const comparison = new Date(a.date_start).getTime() - new Date(b.date_start).getTime();
-          return sortOrder === 'asc' ? comparison : -comparison;
-        });
-      } else if (sortBy === 'price') {
-        processedStages.sort((a, b) => {
-          const comparison = a.price - b.price;
-          return sortOrder === 'asc' ? comparison : -comparison;
-        });
-      } else if (sortBy === 'proximite' && filters?.searchCityCoords) {
-        // Sort by distance (ascending only makes sense for proximity)
-        processedStages.sort((a, b) => (a.distance_km || 0) - (b.distance_km || 0));
+        // Sort by proximity if requested
+        if (filters.sortBy === 'proximite') {
+          processedStages.sort((a, b) => (a.distance_km || 0) - (b.distance_km || 0));
+        }
       }
 
       console.log(`✅ Loaded ${processedStages.length} stages`);
@@ -168,17 +164,26 @@ export function useStage(id: string) {
         setLoading(true);
         setError(null);
 
-        const { data, error: fetchError } = await supabase
-          .from('stages_recuperation_points')
-          .select('*')
-          .eq('id', id)
-          .single();
+        const response = await fetch(`${API_URL}/stages.php?id=${id}`);
 
-        if (fetchError) {
-          throw new Error(fetchError.message);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
         }
 
-        setStage(data);
+        const result = await response.json();
+
+        if (result.error) {
+          throw new Error(result.error);
+        }
+
+        // Convert string numbers to actual numbers
+        const stageData = result.data;
+        setStage({
+          ...stageData,
+          price: parseFloat(stageData.price),
+          latitude: parseFloat(stageData.latitude),
+          longitude: parseFloat(stageData.longitude),
+        });
       } catch (err) {
         console.error('Error loading stage:', err);
         setError(err instanceof Error ? err.message : 'Erreur inattendue');

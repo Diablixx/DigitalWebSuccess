@@ -3,8 +3,9 @@
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Stage } from '@/hooks/useStages';
-import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+
+const API_URL = process.env.NEXT_PUBLIC_MYSQL_API_URL || 'https://admin.digitalwebsuccess.com/mysql-api';
 
 export default function MerciPage() {
   const params = useParams();
@@ -24,33 +25,50 @@ export default function MerciPage() {
         return;
       }
 
-      // Fetch stage
-      const { data: stageData, error: stageError } = await supabase
-        .from('stages_recuperation_points')
-        .select('*')
-        .eq('id', stageId)
-        .single();
+      try {
+        // Fetch stage
+        console.log('🎯 Fetching stage from MySQL API...');
+        const stageResponse = await fetch(`${API_URL}/stages.php?id=${stageId}`);
 
-      if (stageError) {
-        console.error('Error fetching stage:', stageError);
-      } else {
-        setStage(stageData);
+        if (!stageResponse.ok) {
+          throw new Error(`HTTP ${stageResponse.status}: ${stageResponse.statusText}`);
+        }
+
+        const stageResult = await stageResponse.json();
+
+        if (stageResult.error) {
+          throw new Error(stageResult.error);
+        }
+
+        const stageData = stageResult.data;
+        setStage({
+          ...stageData,
+          price: parseFloat(stageData.price),
+          latitude: parseFloat(stageData.latitude),
+          longitude: parseFloat(stageData.longitude),
+        });
+
+        // Fetch booking
+        console.log('📋 Fetching booking from MySQL API...');
+        const bookingResponse = await fetch(`${API_URL}/bookings.php?ref=${bookingRef}`);
+
+        if (!bookingResponse.ok) {
+          throw new Error(`HTTP ${bookingResponse.status}: ${bookingResponse.statusText}`);
+        }
+
+        const bookingResult = await bookingResponse.json();
+
+        if (bookingResult.error) {
+          throw new Error(bookingResult.error);
+        }
+
+        setBooking(bookingResult.data);
+        console.log('✅ Data loaded successfully from MySQL');
+      } catch (err) {
+        console.error('❌ Error fetching data:', err);
+      } finally {
+        setLoading(false);
       }
-
-      // Fetch booking
-      const { data: bookingData, error: bookingError } = await supabase
-        .from('stage_bookings')
-        .select('*')
-        .eq('booking_reference', bookingRef)
-        .single();
-
-      if (bookingError) {
-        console.error('Error fetching booking:', bookingError);
-      } else {
-        setBooking(bookingData);
-      }
-
-      setLoading(false);
     }
 
     fetchData();

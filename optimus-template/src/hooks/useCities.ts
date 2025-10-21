@@ -1,12 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const API_URL = process.env.NEXT_PUBLIC_MYSQL_API_URL || 'https://admin.digitalwebsuccess.com/mysql-api';
 
 export function useCities() {
   const [cities, setCities] = useState<string[]>([]);
@@ -19,20 +15,21 @@ export function useCities() {
         setLoading(true);
         setError(null);
 
-        console.log('🏙️ Loading unique cities from Supabase...');
+        console.log('🏙️ Loading unique cities from MySQL API...');
 
-        const { data, error: fetchError } = await supabase
-          .from('stages_recuperation_points')
-          .select('city');
+        const response = await fetch(`${API_URL}/stages.php?action=cities`);
 
-        if (fetchError) {
-          throw new Error(`Supabase error: ${fetchError.message}`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
-        // Extract unique cities and sort alphabetically
-        const uniqueCities = Array.from(
-          new Set(data?.map((row) => row.city) || [])
-        ).sort();
+        const result = await response.json();
+
+        if (result.error) {
+          throw new Error(result.error);
+        }
+
+        const uniqueCities = result.data || [];
 
         console.log(`✅ Loaded ${uniqueCities.length} unique cities`);
         setCities(uniqueCities);

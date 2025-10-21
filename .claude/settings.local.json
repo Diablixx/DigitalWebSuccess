@@ -51,7 +51,8 @@
       "Bash(code:*)",
       "Bash(python3:*)",
       "Bash(sed:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(MYSQL_HOST=vautour.o2switch.net MYSQL_DATABASE=maab3521_optimus-stages MYSQL_USER=maab3521_stages-user MYSQL_PASSWORD='Vratouy1214!' npx tsx:*)"
     ],
     "deny": [],
     "ask": []
