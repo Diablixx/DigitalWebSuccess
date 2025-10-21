@@ -3,7 +3,8 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Stage } from '@/hooks/useStages';
-import { supabase } from '@/lib/supabase';
+
+const API_URL = process.env.NEXT_PUBLIC_MYSQL_API_URL || 'https://admin.digitalwebsuccess.com/mysql-api';
 
 export default function InscriptionPage() {
   const params = useParams();
@@ -34,18 +35,31 @@ export default function InscriptionPage() {
 
   useEffect(() => {
     async function fetchStage() {
-      const { data, error } = await supabase
-        .from('stages_recuperation_points')
-        .select('*')
-        .eq('id', stageId)
-        .single();
+      try {
+        const response = await fetch(`${API_URL}/stages.php?id=${stageId}`);
 
-      if (error) {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        if (result.error) {
+          throw new Error(result.error);
+        }
+
+        const stageData = result.data;
+        setStage({
+          ...stageData,
+          price: parseFloat(stageData.price),
+          latitude: parseFloat(stageData.latitude),
+          longitude: parseFloat(stageData.longitude),
+        });
+      } catch (error) {
         console.error('Error fetching stage:', error);
-      } else {
-        setStage(data);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
     fetchStage();
