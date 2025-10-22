@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Stage } from '@/hooks/useStages';
 import Link from 'next/link';
 
-const API_URL = process.env.NEXT_PUBLIC_MYSQL_API_URL || 'https://admin.digitalwebsuccess.com/mysql-api';
+const API_URL = process.env.NEXT_PUBLIC_MYSQL_API_URL || 'http://admin.digitalwebsuccess.com/mysql-api';
 
 export default function MerciPage() {
   const params = useParams();

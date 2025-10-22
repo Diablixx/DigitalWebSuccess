@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Stage } from '@/hooks/useStages';
 
-const API_URL = process.env.NEXT_PUBLIC_MYSQL_API_URL || 'https://admin.digitalwebsuccess.com/mysql-api';
+const API_URL = process.env.NEXT_PUBLIC_MYSQL_API_URL || 'http://admin.digitalwebsuccess.com/mysql-api';
 
 export default function InscriptionPage() {
   const params = useParams();
@@ -122,7 +122,7 @@ export default function InscriptionPage() {
       const dateNaissance = `${formData.annee_naissance}-${String(formData.mois_naissance).padStart(2, '0')}-${String(formData.jour_naissance).padStart(2, '0')}`;
 
       // Submit booking to MySQL API
-      const API_URL = process.env.NEXT_PUBLIC_MYSQL_API_URL || 'https://admin.digitalwebsuccess.com/mysql-api';
+      const API_URL = process.env.NEXT_PUBLIC_MYSQL_API_URL || 'http://admin.digitalwebsuccess.com/mysql-api';
 
       const response = await fetch(`${API_URL}/bookings.php`, {
         method: 'POST',

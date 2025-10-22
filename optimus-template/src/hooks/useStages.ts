@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-const API_URL = process.env.NEXT_PUBLIC_MYSQL_API_URL || 'https://admin.digitalwebsuccess.com/mysql-api';
+const API_URL = process.env.NEXT_PUBLIC_MYSQL_API_URL || 'http://admin.digitalwebsuccess.com/mysql-api';
 
 // Haversine formula to calculate distance between two coordinates in kilometers
 function calculateDistance(
