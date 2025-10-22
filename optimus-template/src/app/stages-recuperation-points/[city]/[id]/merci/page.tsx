@@ -5,8 +5,6 @@ import { useEffect, useState } from 'react';
 import { Stage } from '@/hooks/useStages';
 import Link from 'next/link';
 
-const API_URL = process.env.NEXT_PUBLIC_MYSQL_API_URL || 'http://admin.digitalwebsuccess.com/mysql-api';
-
 export default function MerciPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -26,8 +24,9 @@ export default function MerciPage() {
       }
 
       try {
-        // Fetch stage
-        console.log('🎯 Fetching stage from MySQL API...');
+        // Fetch stage via hook's API
+        console.log('🎯 Fetching stage...');
+        const API_URL = process.env.NEXT_PUBLIC_MYSQL_API_URL || 'http://admin.digitalwebsuccess.com/mysql-api';
         const stageResponse = await fetch(`${API_URL}/stages.php?id=${stageId}`);
 
         if (!stageResponse.ok) {
@@ -48,9 +47,9 @@ export default function MerciPage() {
           longitude: parseFloat(stageData.longitude),
         });
 
-        // Fetch booking
-        console.log('📋 Fetching booking from MySQL API...');
-        const bookingResponse = await fetch(`${API_URL}/bookings.php?ref=${bookingRef}`);
+        // Fetch booking via Next.js API proxy (avoids Mixed Content HTTPS→HTTP issue)
+        console.log('📋 Fetching booking...');
+        const bookingResponse = await fetch(`/api/bookings?ref=${bookingRef}`);
 
         if (!bookingResponse.ok) {
           throw new Error(`HTTP ${bookingResponse.status}: ${bookingResponse.statusText}`);
@@ -63,7 +62,7 @@ export default function MerciPage() {
         }
 
         setBooking(bookingResult.data);
-        console.log('✅ Data loaded successfully from MySQL');
+        console.log('✅ Data loaded successfully');
       } catch (err) {
         console.error('❌ Error fetching data:', err);
       } finally {

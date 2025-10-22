@@ -124,10 +124,8 @@ export default function InscriptionPage() {
       // Create date of birth
       const dateNaissance = `${formData.annee_naissance}-${String(formData.mois_naissance).padStart(2, '0')}-${String(formData.jour_naissance).padStart(2, '0')}`;
 
-      // Submit booking to MySQL API
-      const API_URL = process.env.NEXT_PUBLIC_MYSQL_API_URL || 'http://admin.digitalwebsuccess.com/mysql-api';
-
-      const response = await fetch(`${API_URL}/bookings.php`, {
+      // Submit booking via Next.js API proxy (avoids Mixed Content HTTPS→HTTP issue)
+      const response = await fetch('/api/bookings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
