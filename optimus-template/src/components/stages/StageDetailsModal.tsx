@@ -186,7 +186,7 @@ export default function StageDetailsModal({ stage, isOpen, onClose }: StageDetai
           {/* Price */}
           <div className="text-center mb-8">
             <div style={{ color: '#d7302f', fontSize: '68px', fontWeight: 'bold', lineHeight: '1', marginBottom: '8px' }}>
-              {Math.round(stage.price)} €
+              {Math.round(Number(stage.price))} €
             </div>
             <div style={{ color: '#666666', fontSize: '14px' }}>
               TTC

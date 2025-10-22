@@ -88,7 +88,7 @@ export default function StageCard({ stage }: StageCardProps) {
         {/* Right: Price & CTA */}
         <div className="flex-shrink-0 flex flex-col items-end justify-center pr-4 gap-2">
           <div className="text-2xl font-bold text-gray-900">
-            {stage.price.toFixed(0)} €
+            {Number(stage.price).toFixed(0)} €
           </div>
           <Link
             href={`/stages-recuperation-points-${citySlug}/${stage.id}/inscription`}
