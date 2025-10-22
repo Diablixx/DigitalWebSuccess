@@ -88,7 +88,10 @@ export default function InscriptionPage() {
 
   // Format dates
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+    // Parse MySQL date format (YYYY-MM-DD) explicitly to avoid timezone issues
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // month is 0-indexed in JavaScript
+
     const days = ['DIMANCHE', 'LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI'];
     const months = ['JANVIER', 'FÉVRIER', 'MARS', 'AVRIL', 'MAI', 'JUIN', 'JUILLET', 'AOÛT', 'SEPTEMBRE', 'OCTOBRE', 'NOVEMBRE', 'DÉCEMBRE'];
     return `${days[date.getDay()]} ${String(date.getDate()).padStart(2, '0')} ${months[date.getMonth()]} ${date.getFullYear()}`;

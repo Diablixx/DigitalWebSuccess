@@ -100,7 +100,10 @@ export default function MerciPage() {
 
   // Format dates
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+    // Parse MySQL date format (YYYY-MM-DD) explicitly to avoid timezone issues
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // month is 0-indexed in JavaScript
+
     const days = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
     const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
     return `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;

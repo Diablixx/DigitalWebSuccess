@@ -4,7 +4,29 @@ require_once 'config.php';
 $pdo = getDBConnection();
 $method = $_SERVER['REQUEST_METHOD'];
 
-// GET /stages.php - Fetch all stages with filters
+// GET /stages.php?action=cities - Fetch unique cities (check this FIRST)
+if ($method === 'GET' && isset($_GET['action']) && $_GET['action'] === 'cities') {
+    $stmt = $pdo->query("SELECT DISTINCT city FROM stages_recuperation_points ORDER BY city");
+    $cities = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    sendResponse(['data' => $cities]);
+    exit;
+}
+
+// GET /stages.php?id=xxx - Fetch single stage (check this SECOND)
+if ($method === 'GET' && isset($_GET['id'])) {
+    $stmt = $pdo->prepare("SELECT * FROM stages_recuperation_points WHERE id = :id");
+    $stmt->execute([':id' => $_GET['id']]);
+    $stage = $stmt->fetch();
+
+    if ($stage) {
+        sendResponse(['data' => $stage]);
+    } else {
+        sendResponse(['error' => 'Stage not found'], 404);
+    }
+    exit;
+}
+
+// GET /stages.php - Fetch all stages with filters (default)
 if ($method === 'GET') {
     $city = isset($_GET['city']) ? $_GET['city'] : null;
     $cities = isset($_GET['cities']) ? explode(',', $_GET['cities']) : [];
@@ -43,27 +65,7 @@ if ($method === 'GET') {
     $stages = $stmt->fetchAll();
 
     sendResponse(['data' => $stages]);
-}
-
-// GET /stages.php?id=xxx - Fetch single stage
-if ($method === 'GET' && isset($_GET['id'])) {
-    $stmt = $pdo->prepare("SELECT * FROM stages_recuperation_points WHERE id = :id");
-    $stmt->execute([':id' => $_GET['id']]);
-    $stage = $stmt->fetch();
-
-    if ($stage) {
-        sendResponse(['data' => $stage]);
-    } else {
-        sendResponse(['error' => 'Stage not found'], 404);
-    }
-}
-
-// GET /stages.php?action=cities - Fetch unique cities
-if ($method === 'GET' && isset($_GET['action']) && $_GET['action'] === 'cities') {
-    $stmt = $pdo->query("SELECT DISTINCT city FROM stages_recuperation_points ORDER BY city");
-    $cities = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-    sendResponse(['data' => $cities]);
+    exit;
 }
 
 sendResponse(['error' => 'Invalid request'], 400);

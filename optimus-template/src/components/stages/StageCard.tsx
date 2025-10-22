@@ -11,8 +11,15 @@ interface StageCardProps {
 
 // Format date to French format (e.g., "Ven 24 et Sam 25 Octobre")
 function formatDateRange(startDate: string, endDate: string): string {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+  // Parse MySQL date format (YYYY-MM-DD) explicitly to avoid timezone issues
+  const parseDate = (dateStr: string): Date => {
+    // MySQL returns "YYYY-MM-DD", parse it directly
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day); // month is 0-indexed in JavaScript
+  };
+
+  const start = parseDate(startDate);
+  const end = parseDate(endDate);
 
   const daysOfWeek = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
   const months = [
