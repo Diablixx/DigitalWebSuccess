@@ -172,7 +172,7 @@ export default function MerciPage() {
               </svg>
               <div>
                 <h3 className="font-semibold text-gray-900 mb-1">Tarif</h3>
-                <p className="text-2xl font-bold text-gray-900">{Math.round(stage.price)} €</p>
+                <p className="text-2xl font-bold text-gray-900">{Math.round(Number(stage.price))} €</p>
                 {booking.guarantee_serenite && (
                   <p className="text-sm text-gray-600 mt-1">+ 25 € (Garantie Sérénité)</p>
                 )}
