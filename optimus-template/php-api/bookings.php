@@ -13,6 +13,7 @@ if ($method === 'POST') {
     foreach ($required as $field) {
         if (empty($input[$field])) {
             sendResponse(['error' => "Missing required field: $field"], 400);
+            exit;
         }
     }
 
@@ -70,8 +71,10 @@ if ($method === 'POST') {
                 'booking_reference' => $bookingRef
             ]
         ], 201);
+        exit;
     } catch(PDOException $e) {
         sendResponse(['error' => 'Failed to create booking', 'message' => $e->getMessage()], 500);
+        exit;
     }
 }
 
@@ -91,6 +94,7 @@ if ($method === 'GET' && isset($_GET['ref'])) {
     } else {
         sendResponse(['error' => 'Booking not found'], 404);
     }
+    exit;
 }
 
 sendResponse(['error' => 'Invalid request'], 400);
