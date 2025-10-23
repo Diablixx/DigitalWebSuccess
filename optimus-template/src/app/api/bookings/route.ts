@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-API-Key': process.env.O2SWITCH_API_KEY || '',
       },
       body: JSON.stringify(body),
     });
@@ -44,7 +45,11 @@ export async function GET(request: NextRequest) {
 
     console.log('📨 Fetching booking:', ref);
 
-    const response = await fetch(`${MYSQL_API_URL}/bookings.php?ref=${ref}`);
+    const response = await fetch(`${MYSQL_API_URL}/bookings.php?ref=${ref}`, {
+      headers: {
+        'X-API-Key': process.env.O2SWITCH_API_KEY || '',
+      },
+    });
     const data = await response.json();
 
     console.log('✅ Booking fetch response:', response.status);
